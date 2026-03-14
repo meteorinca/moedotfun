@@ -1,0 +1,20 @@
+[
+  {
+    "title": "FishGame",
+    "description": "A deep-sea survival simulation.",
+    "link": "https://example.com/fish-game",
+    "image": "assets/fishgame.jpg"
+  },
+  {
+    "title": "MathRacing",
+    "description": "Speed-solve to win the race.",
+    "link": "https://example.com/math-racing",
+    "image": "assets/mathracing.jpg"
+  },
+  {
+    "title": "UnstableStack",
+    "description": "Physics-based tower building.",
+    "link": "https://example.com/unstable-stack",
+    "image": "assets/unstablestack.jpg"
+  }
+]
