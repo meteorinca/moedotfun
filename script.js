@@ -1,65 +1,159 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const grid = document.getElementById('grid-container');
-    const filterButtons = document.querySelectorAll('.filter-btn');
+    const contentArea = document.getElementById('content-area');
+    const navItems = document.querySelectorAll('.hn-nav-item');
+    const searchInput = document.getElementById('search-input');
+    const itemCountLabel = document.getElementById('item-count-label');
+    const btnLayout = document.getElementById('btn-layout');
+    const btnTheme = document.getElementById('btn-theme');
+
     let allProjects = [];
+    let currentCategory = 'All';
+    let currentLayout = 'list'; // 'list' or 'grid'
+    let currentTheme = localStorage.getItem('moe_theme') || 'light';
+
+    // Apply theme
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    btnTheme.textContent = currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+
+    // Helper to extract clean domain string
+    function extractDomain(url) {
+        if (!url) return 'moedotfun';
+        if (url.startsWith('demos/')) return 'moe.fun';
+        try {
+            const parsed = new URL(url);
+            return parsed.hostname.replace('www.', '');
+        } catch {
+            return 'moe.fun';
+        }
+    }
 
     fetch('projects.json')
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-            allProjects = data;
-            renderProjects('All');
+            // Assign dummy upvote counts & points for HN authentic feel
+            allProjects = data.map((p, index) => ({
+                ...p,
+                points: p.points || Math.floor(Math.random() * 150) + 42,
+                comments: p.comments || Math.floor(Math.random() * 30) + 5,
+                index: index + 1
+            }));
+            render();
         })
-        .catch(error => console.error('Error loading projects:', error));
+        .catch(err => console.error('Error loading projects:', err));
 
-    function renderProjects(category) {
-        grid.innerHTML = '';
-        const filtered = category === 'All' 
-            ? allProjects 
-            : allProjects.filter(p => p.category === category);
+    function render() {
+        const query = searchInput.value.toLowerCase().trim();
+        let filtered = allProjects;
 
-        filtered.forEach(project => {
-            const card = document.createElement('a');
-            card.href = project.link;
-            card.className = 'card';
-            if (project.link.startsWith('http')) {
-                card.target = '_blank';
-                card.rel = 'noopener';
-            }
+        if (currentCategory !== 'All') {
+            filtered = filtered.filter(p => p.category === currentCategory);
+        }
 
-            const badgeHTML = project.badge 
-                ? `<div class="card-badge ${project.badge === 'FEATURED' ? 'badge-featured' : ''}">${project.badge}</div>`
-                : '';
+        if (query) {
+            filtered = filtered.filter(p => 
+                p.title.toLowerCase().includes(query) || 
+                p.description.toLowerCase().includes(query) ||
+                (p.category && p.category.toLowerCase().includes(query))
+            );
+        }
 
-            const categoryHTML = project.category 
-                ? `<div class="card-category">${project.category}</div>`
-                : '';
+        itemCountLabel.textContent = `${filtered.length} item${filtered.length === 1 ? '' : 's'}`;
 
-            card.innerHTML = `
-                <div class="card-image-wrap">
-                    ${badgeHTML}
-                    <img src="${project.image}" alt="${project.title}" onerror="this.onerror=null; this.src='assets/stack.jpg'">
-                </div>
-                <div class="card-content">
-                    ${categoryHTML}
-                    <h2>${project.title}</h2>
-                    <p>${project.description}</p>
-                    <div class="card-footer">
-                        <span>Launch Demo</span>
-                        <span>→</span>
+        if (currentLayout === 'list') {
+            renderListView(filtered);
+        } else {
+            renderGridView(filtered);
+        }
+    }
+
+    function renderListView(projects) {
+        contentArea.className = 'hn-list';
+        if (projects.length === 0) {
+            contentArea.innerHTML = `<div style="padding: 20px 0; color: var(--hn-text-muted);">No experiments match your filter.</div>`;
+            return;
+        }
+
+        contentArea.innerHTML = projects.map((p, i) => {
+            const domain = extractDomain(p.link);
+            const badgeHTML = p.badge ? `<span class="badge-hn">${p.badge}</span>` : '';
+
+            return `
+                <div class="hn-item">
+                    <span class="hn-rank">${i + 1}.</span>
+                    <span class="hn-vote" title="upvote">▲</span>
+                    <div class="hn-details">
+                        <div class="hn-item-title-row">
+                            <a class="hn-item-title" href="${p.link}" ${p.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>${p.title}</a>
+                            <span class="hn-item-domain">(${domain})</span>
+                            ${badgeHTML}
+                        </div>
+                        <div class="hn-item-meta">
+                            <span>${p.points} points</span>
+                            <span>|</span>
+                            <span class="tag-pill">${p.category || 'experiment'}</span>
+                            <span>|</span>
+                            <span>${p.description}</span>
+                        </div>
                     </div>
                 </div>
             `;
-            grid.appendChild(card);
-        });
+        }).join('');
     }
 
-    // Filter Buttons logic
-    filterButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const category = btn.dataset.category;
-            renderProjects(category);
+    function renderGridView(projects) {
+        contentArea.className = 'hn-grid-mode';
+        if (projects.length === 0) {
+            contentArea.innerHTML = `<div style="padding: 20px 0; color: var(--hn-text-muted);">No experiments match your filter.</div>`;
+            return;
+        }
+
+        contentArea.innerHTML = projects.map(p => {
+            const domain = extractDomain(p.link);
+            const badgeHTML = p.badge ? `<span class="badge-hn">${p.badge}</span>` : '';
+
+            return `
+                <div class="hn-card">
+                    <div>
+                        <div class="hn-card-top">
+                            <a class="hn-card-title" href="${p.link}" ${p.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>${p.title}</a>
+                            ${badgeHTML}
+                        </div>
+                        <div class="hn-card-desc">${p.description}</div>
+                    </div>
+                    <div class="hn-card-footer">
+                        <span class="tag-pill">${p.category || 'experiment'}</span>
+                        <span>${domain}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Category navigation filter
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+            currentCategory = item.dataset.category;
+            render();
         });
+    });
+
+    // Search input live filtering
+    searchInput.addEventListener('input', render);
+
+    // Layout switcher button (List vs Cards)
+    btnLayout.addEventListener('click', () => {
+        currentLayout = currentLayout === 'list' ? 'grid' : 'list';
+        btnLayout.textContent = currentLayout === 'list' ? 'View: Grid' : 'View: List';
+        render();
+    });
+
+    // Dark/Light theme button
+    btnTheme.addEventListener('click', () => {
+        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        localStorage.setItem('moe_theme', currentTheme);
+        btnTheme.textContent = currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
     });
 });
