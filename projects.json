@@ -40,11 +40,51 @@
     "badge": "NEW"
   },
   {
+    "title": "Art With Math",
+    "description": "Mind-bending generative mathematical art, fractals, and geometric demos.",
+    "link": "https://meteorinca.github.io/ArtWithMath/",
+    "image": "assets/artwithmath.png",
+    "category": "Creative",
+    "badge": "FEATURED"
+  },
+  {
     "title": "Logic Gates Simulator",
     "description": "Interactive digital circuit and logic gate simulator for tech explorers.",
     "link": "https://meteorinca.github.io/Logic-Gates-Simulator/",
     "image": "assets/logic_gates.png",
     "category": "Educational",
+    "badge": "FEATURED"
+  },
+  {
+    "title": "Understanding Entropy",
+    "description": "An intuitive visual breakdown of thermodynamics, chaos, and information theory.",
+    "link": "https://meteorinca.github.io/entropy/",
+    "image": "assets/entropy.png",
+    "category": "Educational",
+    "badge": "FEATURED"
+  },
+  {
+    "title": "Cyber Fountain",
+    "description": "A hilarious web experiment that releases endless streams of autonomous bots.",
+    "link": "https://meteorinca.github.io/cfountain/",
+    "image": "assets/cfountain.png",
+    "category": "Interactive",
+    "badge": "FUN"
+  },
+  {
+    "title": "Soviet Workout Regiment",
+    "description": "Easy-to-follow minimalist workout routines for peak physical discipline.",
+    "link": "https://meteorinca.github.io/sovietworkout/",
+    "image": "assets/sovietworkout.png",
+    "category": "Interactive",
+    "badge": "FEATURED"
+  },
+  {
+    "title": "Urdu Type Studio",
+    "description": "Seamless online typing environment in authentic Urdu font.",
+    "link": "https://meteorinca.github.io/urdu/",
+    "image": "assets/urdu.png",
+    "category": "Interactive",
     "badge": "FEATURED"
   },
   {
