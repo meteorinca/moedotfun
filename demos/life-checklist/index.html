@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Milestones Checklist | moedotfun</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #090d16;
+            --card-bg: rgba(22, 31, 49, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #f59e0b;
+            --accent-glow: rgba(245, 158, 11, 0.3);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top center, #111827 0%, #090d16 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 4rem;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(9, 13, 22, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 1.25rem 2rem;
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 2.5rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .hud-card {
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .hud-pct {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-shadow: 0 0 20px var(--accent-glow);
+            margin-bottom: 0.5rem;
+        }
+
+        .hud-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .progress-outer {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-inner {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .badge-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid var(--accent);
+            padding: 0.5rem 1.25rem;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #fef08a;
+        }
+
+        .category-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin: 2rem 0 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+
+        .check-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .check-item:hover {
+            border-color: rgba(245, 158, 11, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .check-item.checked {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: var(--accent);
+        }
+
+        .checkbox-custom {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .check-item.checked .checkbox-custom {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .item-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="../../index.html" class="back-link">← Back to moedotfun</a>
+            <h1 style="font-size: 1.4rem; font-weight: 800;">Life Milestones Checklist ✅</h1>
+            <div></div>
+        </div>
+    </header>
+
+    <main>
+        <div class="hud-card">
+            <div class="hud-pct" id="total-pct">0%</div>
+            <div class="hud-subtitle" id="total-counts">0 of 25 Life Milestones Completed</div>
+            <div class="progress-outer">
+                <div class="progress-inner" id="progress-bar"></div>
+            </div>
+            <div class="badge-box" id="badge-display">🏆 Rank: Curious Novice</div>
+        </div>
+
+        <div id="checklist-categories"></div>
+    </main>
+
+    <script>
+        const categories = [
+            {
+                title: "🐣 Early Wonders & Childhood",
+                items: [
+                    "Ride a bicycle without training wheels",
+                    "Build a giant pillow/blanket fort",
+                    "See the ocean in person for the first time",
+                    "Sleep outside under the stars",
+                    "Fly a kite high up in the sky"
+                ]
+            },
+            {
+                title: "💻 Tech, Craft & Ingenuity",
+                items: [
+                    "Write your very first line of computer code",
+                    "Build or customize a desktop PC / hardware",
+                    "Publish an interactive project on moedotfun",
+                    "Pull a fun coding all-nighter",
+                    "Solder an electronic circuit board"
+                ]
+            },
+            {
+                title: "✈️ Adventure & World Exploring",
+                items: [
+                    "Travel to a foreign country",
+                    "Hike to the summit of a mountain",
+                    "Witness a total solar eclipse or aurora",
+                    "Go on an epic cross-country road trip",
+                    "Swim with dolphins or wild marine life"
+                ]
+            },
+            {
+                title: "🎨 Creativity & Mastery",
+                items: [
+                    "Learn to play a song on a musical instrument",
+                    "Solve a Rubik's cube by yourself",
+                    "Cook a gourmet 3-course dinner from scratch",
+                    "Read 50 books in a year",
+                    "Mentor someone and teach them a new skill"
+                ]
+            },
+            {
+                title: "🚀 Epic Life Achievements",
+                items: [
+                    "Fly a high-speed drone",
+                    "Run a 10k or marathon race",
+                    "Adopt a pet animal",
+                    "Start your own passion project / business",
+                    "Bungee jump or skydivide"
+                ]
+            }
+        ];
+
+        let checkedMap = JSON.parse(localStorage.getItem('moe_life_checklist') || '{}');
+
+        const categoriesContainer = document.getElementById('checklist-categories');
+        const totalPctElem = document.getElementById('total-pct');
+        const totalCountsElem = document.getElementById('total-counts');
+        const progressBar = document.getElementById('progress-bar');
+        const badgeDisplay = document.getElementById('badge-display');
+
+        let totalItemCount = 0;
+        categories.forEach(c => totalItemCount += c.items.length);
+
+        function renderChecklist() {
+            categoriesContainer.innerHTML = '';
+
+            categories.forEach((cat, catIdx) => {
+                const catDiv = document.createElement('div');
+                catDiv.innerHTML = `<div class="category-title">${cat.title}</div>`;
+
+                const grid = document.createElement('div');
+                grid.className = 'checklist-grid';
+
+                cat.items.forEach((itemText, itemIdx) => {
+                    const key = `${catIdx}-${itemIdx}`;
+                    const isChecked = !!checkedMap[key];
+
+                    const itemCard = document.createElement('div');
+                    itemCard.className = `check-item ${isChecked ? 'checked' : ''}`;
+                    itemCard.innerHTML = `
+                        <div class="checkbox-custom">${isChecked ? '✓' : ''}</div>
+                        <div class="item-label">${itemText}</div>
+                    `;
+
+                    itemCard.onclick = () => {
+                        checkedMap[key] = !checkedMap[key];
+                        localStorage.setItem('moe_life_checklist', JSON.stringify(checkedMap));
+                        updateStats();
+                        renderChecklist();
+                    };
+
+                    grid.appendChild(itemCard);
+                });
+
+                catDiv.appendChild(grid);
+                categoriesContainer.appendChild(catDiv);
+            });
+        }
+
+        function updateStats() {
+            const checkedCount = Object.values(checkedMap).filter(Boolean).length;
+            const pct = Math.round((checkedCount / totalItemCount) * 100);
+
+            totalPctElem.textContent = `${pct}%`;
+            totalCountsElem.textContent = `${checkedCount} of ${totalItemCount} Life Milestones Completed`;
+            progressBar.style.width = `${pct}%`;
+
+            let badge = "🏆 Rank: Curious Novice";
+            if (pct >= 80) badge = "👑 Rank: Grand Master of Life";
+            else if (pct >= 50) badge = "⚡ Rank: Epic Adventurer";
+            else if (pct >= 25) badge = "💻 Rank: Tech Wizard & Craftsman";
+            else if (pct >= 10) badge = "🌱 Rank: Explorer Apprentice";
+
+            badgeDisplay.textContent = badge;
+        }
+
+        renderChecklist();
+        updateStats();
+    </script>
+</body>
+</html>
