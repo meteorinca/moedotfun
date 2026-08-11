@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const contentArea = document.getElementById('content-area');
-    const navItems = document.querySelectorAll('.hn-nav-item');
+    const navItems = document.querySelectorAll('.app-nav-item');
     const searchInput = document.getElementById('search-input');
     const itemCountLabel = document.getElementById('item-count-label');
     const btnLayout = document.getElementById('btn-layout');
@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('projects.json')
         .then(res => res.json())
         .then(data => {
-            // Assign dummy upvote counts & points for HN authentic feel
             allProjects = data.map((p, index) => ({
                 ...p,
                 points: p.points || Math.floor(Math.random() * 150) + 42,
@@ -67,27 +66,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderListView(projects) {
-        contentArea.className = 'hn-list';
+        contentArea.className = 'app-list';
         if (projects.length === 0) {
-            contentArea.innerHTML = `<div style="padding: 20px 0; color: var(--hn-text-muted);">No experiments match your filter.</div>`;
+            contentArea.innerHTML = `<div style="padding: 20px 0; color: var(--text-muted);">No experiments match your filter.</div>`;
             return;
         }
 
         contentArea.innerHTML = projects.map((p, i) => {
             const domain = extractDomain(p.link);
-            const badgeHTML = p.badge ? `<span class="badge-hn">${p.badge}</span>` : '';
+            const badgeHTML = p.badge ? `<span class="badge-tag">${p.badge}</span>` : '';
 
             return `
-                <div class="hn-item">
-                    <span class="hn-rank">${i + 1}.</span>
-                    <span class="hn-vote" title="upvote">▲</span>
-                    <div class="hn-details">
-                        <div class="hn-item-title-row">
-                            <a class="hn-item-title" href="${p.link}" ${p.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>${p.title}</a>
-                            <span class="hn-item-domain">(${domain})</span>
+                <div class="app-item">
+                    <span class="app-rank">${i + 1}.</span>
+                    <span class="app-vote" title="upvote">▲</span>
+                    <div class="app-details">
+                        <div class="app-item-title-row">
+                            <a class="app-item-title" href="${p.link}" ${p.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>${p.title}</a>
+                            <span class="app-item-domain">(${domain})</span>
                             ${badgeHTML}
                         </div>
-                        <div class="hn-item-meta">
+                        <div class="app-item-meta">
                             <span>${p.points} points</span>
                             <span>|</span>
                             <span class="tag-pill">${p.category || 'experiment'}</span>
@@ -101,26 +100,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderGridView(projects) {
-        contentArea.className = 'hn-grid-mode';
+        contentArea.className = 'app-grid-mode';
         if (projects.length === 0) {
-            contentArea.innerHTML = `<div style="padding: 20px 0; color: var(--hn-text-muted);">No experiments match your filter.</div>`;
+            contentArea.innerHTML = `<div style="padding: 20px 0; color: var(--text-muted);">No experiments match your filter.</div>`;
             return;
         }
 
         contentArea.innerHTML = projects.map(p => {
             const domain = extractDomain(p.link);
-            const badgeHTML = p.badge ? `<span class="badge-hn">${p.badge}</span>` : '';
+            const badgeHTML = p.badge ? `<span class="badge-tag">${p.badge}</span>` : '';
 
             return `
-                <div class="hn-card">
+                <div class="app-card">
                     <div>
-                        <div class="hn-card-top">
-                            <a class="hn-card-title" href="${p.link}" ${p.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>${p.title}</a>
+                        <div class="app-card-top">
+                            <a class="app-card-title" href="${p.link}" ${p.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>${p.title}</a>
                             ${badgeHTML}
                         </div>
-                        <div class="hn-card-desc">${p.description}</div>
+                        <div class="app-card-desc">${p.description}</div>
                     </div>
-                    <div class="hn-card-footer">
+                    <div class="app-card-footer">
                         <span class="tag-pill">${p.category || 'experiment'}</span>
                         <span>${domain}</span>
                     </div>
