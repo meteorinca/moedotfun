@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spend Tech Billions | moedotfun</title>
+    <meta name="description" content="Have $200 Billion? Spend it on rockets, islands, supercomputers, and more.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #090d16;
@@ -19,29 +20,25 @@
             --red: #ef4444;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Outfit', sans-serif;
             background: radial-gradient(circle at top center, #111827 0%, #090d16 100%);
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 4rem;
+            padding-bottom: 5rem;
         }
 
         header {
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(9, 13, 22, 0.85);
+            background: rgba(9, 13, 22, 0.9);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border);
-            padding: 1.25rem 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 1.1rem 2rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
         }
 
         .header-content {
@@ -51,51 +48,46 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.75rem;
         }
 
         .back-link {
             color: var(--text-muted);
             text-decoration: none;
             font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+            font-size: 0.9rem;
             transition: color 0.2s;
         }
+        .back-link:hover { color: var(--accent-green); }
 
-        .back-link:hover {
-            color: var(--accent-green);
-        }
+        .money-header { text-align: center; flex-grow: 1; }
 
-        .money-header {
-            text-align: center;
-            flex-grow: 1;
-        }
-
-        .money-title {
-            font-size: 0.85rem;
+        .money-label {
+            font-size: 0.72rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 2.5px;
             color: var(--text-muted);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
+            opacity: 0.65;
         }
 
         .money-amount {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 800;
             color: var(--accent-green);
             text-shadow: 0 0 20px var(--accent-glow);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+
+        .money-amount.negative { color: var(--red); text-shadow: 0 0 20px rgba(239,68,68,0.3); }
 
         .progress-container {
             width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.08);
+            height: 5px;
+            background: rgba(255,255,255,0.06);
             border-radius: 999px;
-            margin-top: 0.75rem;
+            margin-top: 0.6rem;
             overflow: hidden;
         }
 
@@ -106,145 +98,136 @@
             transition: width 0.3s ease;
         }
 
-        .controls {
-            display: flex;
-            gap: 0.75rem;
-        }
+        .controls { display: flex; gap: 0.6rem; }
 
         .btn {
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.07);
             border: 1px solid var(--border);
             color: var(--text-main);
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            font-weight: 600;
+            padding: 0.45rem 0.9rem;
+            border-radius: 9px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.82rem;
             cursor: pointer;
             transition: all 0.2s;
+            letter-spacing: 0.3px;
         }
-
         .btn:hover {
-            background: rgba(255,255,255,0.15);
-            transform: translateY(-2px);
+            background: rgba(255,255,255,0.13);
+            transform: translateY(-1px);
         }
 
         .btn-reset {
-            border-color: rgba(239, 68, 68, 0.4);
+            border-color: rgba(239, 68, 68, 0.3);
             color: #fca5a5;
         }
+        .btn-reset:hover { background: rgba(239, 68, 68, 0.12); }
 
-        .btn-reset:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-
+        /* Grid */
         main {
             max-width: 1200px;
-            margin: 2.5rem auto 0 auto;
+            margin: 2.5rem auto 0;
             padding: 0 1.5rem;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.25rem;
         }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.5rem;
+            border-radius: 18px;
+            padding: 1.3rem 1.4rem;
             text-align: center;
             backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            min-height: 160px;
         }
-
         .card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(16, 185, 129, 0.4);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            transform: translateY(-3px);
+            border-color: rgba(16, 185, 129, 0.35);
+            box-shadow: 0 10px 28px rgba(0,0,0,0.25);
         }
 
-        .item-icon {
-            font-size: 3.5rem;
-            margin-bottom: 0.75rem;
-            user-select: none;
+        .item-tier {
+            display: inline-block;
+            font-size: 0.63rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 0.18rem 0.55rem;
+            border-radius: 4px;
+            margin-bottom: 0.65rem;
         }
+        .tier-consumer { background: rgba(16,185,129,0.12); color: #6ee7b7; }
+        .tier-premium  { background: rgba(6,182,212,0.12);  color: #67e8f9; }
+        .tier-luxury   { background: rgba(168,85,247,0.12); color: #d8b4fe; }
+        .tier-elite    { background: rgba(245,158,11,0.12); color: #fde68a; }
+        .tier-mega     { background: rgba(239,68,68,0.12);  color: #fca5a5; }
 
         .item-name {
-            font-size: 1.2rem;
+            font-size: 1.05rem;
             font-weight: 700;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
+            line-height: 1.25;
         }
 
         .item-cost {
             font-family: 'JetBrains Mono', monospace;
             color: var(--accent-green);
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
             margin-bottom: 1rem;
         }
 
         .item-actions {
             display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr;
-            gap: 0.5rem;
+            grid-template-columns: 1fr 1.4fr 1fr;
+            gap: 0.45rem;
             align-items: center;
         }
 
         .btn-action {
-            padding: 0.6rem;
-            font-weight: 700;
-            border-radius: 12px;
-            font-size: 1rem;
+            padding: 0.55rem;
+            font-weight: 800;
+            border-radius: 10px;
+            font-size: 0.9rem;
             border: none;
             cursor: pointer;
             transition: opacity 0.2s, transform 0.1s;
+            font-family: inherit;
         }
+        .btn-action:active { transform: scale(0.94); }
 
-        .btn-action:active {
-            transform: scale(0.95);
-        }
+        .btn-sell { background: rgba(239,68,68,0.85); color: white; }
+        .btn-sell:disabled { background: rgba(239,68,68,0.15); color: rgba(255,255,255,0.25); cursor: not-allowed; }
 
-        .btn-sell {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn-sell:disabled {
-            background: rgba(239, 68, 68, 0.2);
-            color: rgba(255,255,255,0.3);
-            cursor: not-allowed;
-        }
-
-        .btn-buy {
-            background: var(--accent-green);
-            color: #042f2e;
-        }
-
-        .btn-buy:disabled {
-            background: rgba(16, 185, 129, 0.2);
-            color: rgba(255,255,255,0.3);
-            cursor: not-allowed;
-        }
+        .btn-buy { background: var(--accent-green); color: #042f2e; }
+        .btn-buy:disabled { background: rgba(16,185,129,0.15); color: rgba(255,255,255,0.25); cursor: not-allowed; }
 
         .item-count {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0,0,0,0.25);
             padding: 0.5rem;
-            border-radius: 10px;
+            border-radius: 8px;
             border: 1px solid var(--border);
         }
 
+        /* Receipt */
         .receipt-section {
             margin-top: 4rem;
             background: rgba(17, 24, 39, 0.8);
-            border: 1px dashed rgba(255,255,255,0.2);
-            border-radius: 24px;
+            border: 1px dashed rgba(255,255,255,0.15);
+            border-radius: 22px;
             padding: 2rem;
             max-width: 600px;
             margin-left: auto;
@@ -253,46 +236,131 @@
 
         .receipt-title {
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: 800;
             margin-bottom: 1.5rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            color: var(--text-muted);
         }
 
-        .receipt-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
+        .receipt-list { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; }
 
         .receipt-item {
             display: flex;
             justify-content: space-between;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             padding-bottom: 0.5rem;
-            border-bottom: 1px rgba(255,255,255,0.05) solid;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
         }
 
         .receipt-total {
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-            border-top: 2px solid var(--accent-green);
+            margin-top: 1.25rem;
+            padding-top: 0.9rem;
+            border-top: 1px solid var(--accent-green);
             display: flex;
             justify-content: space-between;
             font-weight: 800;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-family: 'JetBrains Mono', monospace;
             color: var(--accent-green);
         }
 
-        .empty-receipt {
-            text-align: center;
-            color: var(--text-muted);
-            font-style: italic;
+        .empty-receipt { text-align: center; color: var(--text-muted); font-style: italic; font-size: 0.9rem; }
+
+        /* Toast system */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            pointer-events: none;
         }
+
+        .toast {
+            background: rgba(17, 24, 39, 0.95);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 12px;
+            padding: 0.7rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #d1fae5;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+                       toastOut 0.3s ease 2.7s forwards;
+            max-width: 280px;
+        }
+
+        .toast .toast-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-green);
+            opacity: 0.8;
+            margin-bottom: 0.2rem;
+        }
+
+        @keyframes toastIn  { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+
+        /* Broke overlay */
+        .broke-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        .broke-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .broke-box {
+            background: #0f172a;
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 24px;
+            padding: 2.5rem 3rem;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .broke-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--red);
+            margin-bottom: 0.75rem;
+        }
+
+        .broke-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.75rem;
+        }
+
+        .btn-recover {
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.4);
+            color: #fca5a5;
+            padding: 0.65rem 1.5rem;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-recover:hover { background: rgba(239,68,68,0.25); }
     </style>
 </head>
 <body>
@@ -300,15 +368,15 @@
         <div class="header-content">
             <a href="../../index.html" class="back-link">← Back to moedotfun</a>
             <div class="money-header">
-                <div class="money-title">Net Worth Remaining</div>
+                <div class="money-label">Net Worth Remaining</div>
                 <div class="money-amount" id="balance-display">$200,000,000,000</div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
             </div>
             <div class="controls">
-                <button class="btn" id="btn-random">🎲 Random Buy</button>
+                <button class="btn" id="btn-random">Randomize</button>
                 <button class="btn btn-reset" id="btn-reset">Reset</button>
-            </div>
-            <div class="progress-container">
-                <div class="progress-bar" id="progress-bar"></div>
             </div>
         </div>
     </header>
@@ -317,9 +385,9 @@
         <div class="grid" id="items-grid"></div>
 
         <section class="receipt-section">
-            <h2 class="receipt-title">Your Receipt 🧾</h2>
+            <h2 class="receipt-title">Purchase Receipt</h2>
             <ul class="receipt-list" id="receipt-list">
-                <li class="empty-receipt">You haven't bought anything yet! Start spending billions.</li>
+                <li class="empty-receipt">Nothing purchased yet. Start spending.</li>
             </ul>
             <div class="receipt-total">
                 <span>Total Spent</span>
@@ -328,54 +396,112 @@
         </section>
     </main>
 
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="broke-overlay" id="broke-overlay">
+        <div class="broke-box">
+            <div class="broke-title">Liquidated.</div>
+            <p class="broke-desc">
+                You've spent every last dollar. No emergency fund. No backup. 
+                Just a lot of very expensive decisions.
+            </p>
+            <button class="btn-recover" id="btn-recover">Start Over</button>
+        </div>
+    </div>
+
     <script>
-        const INITIAL_MONEY = 200000000000;
+        const INITIAL_MONEY = 200_000_000_000;
         let money = INITIAL_MONEY;
 
-        const items = [
-            { id: 1, name: "Big Mac", cost: 5, icon: "🍔", count: 0 },
-            { id: 2, name: "Flip Flops", cost: 15, icon: "🩴", count: 0 },
-            { id: 3, name: "Video Game", cost: 60, icon: "🎮", count: 0 },
-            { id: 4, name: "AirPods Max", cost: 550, icon: "🎧", count: 0 },
-            { id: 5, name: "Gaming Rig PC", cost: 3500, icon: "🖥️", count: 0 },
-            { id: 6, name: "Rolex Watch", cost: 14000, icon: "⌚", count: 0 },
-            { id: 7, name: "Tesla Cybertruck", cost: 100000, icon: "📐", count: 0 },
-            { id: 8, name: "Suburban Home", cost: 500000, icon: "🏡", count: 0 },
-            { id: 9, name: "McDonald's Franchise", cost: 1500000, icon: "🍟", count: 0 },
-            { id: 10, name: "Super Bowl Commercial", cost: 7000000, icon: "📺", count: 0 },
-            { id: 11, name: "Tropical Private Island", cost: 18000000, icon: "🏝️", count: 0 },
-            { id: 12, name: "Falcon Heavy Launch", cost: 90000000, icon: "🚀", count: 0 },
-            { id: 13, name: "Boeing 747 Jet", cost: 400000000, icon: "✈️", count: 0 },
-            { id: 14, name: "Mona Lisa Painting", cost: 860000000, icon: "🖼️", count: 0 },
-            { id: 15, name: "NBA Franchise", cost: 3200000000, icon: "🏀", count: 0 },
-            { id: 16, name: "AAA Gaming Studio", cost: 7500000000, icon: "👾", count: 0 },
-            { id: 17, name: "AI Supercomputer Cluster", cost: 18000000000, icon: "🧠", count: 0 },
-            { id: 18, name: "Commercial Moon Base", cost: 45000000000, icon: "🌕", count: 0 }
-        ];
+        const milestonesFired = new Set();
 
-        function formatCurrency(val) {
-            return '$' + val.toLocaleString('en-US');
+        function getTier(cost) {
+            if (cost <         1_000) return { label: 'Consumer', cls: 'tier-consumer' };
+            if (cost <     1_000_000) return { label: 'Premium',  cls: 'tier-premium'  };
+            if (cost < 1_000_000_000) return { label: 'Luxury',   cls: 'tier-luxury'   };
+            if (cost < 10_000_000_000)return { label: 'Elite',    cls: 'tier-elite'    };
+            return                           { label: 'Mega',     cls: 'tier-mega'     };
         }
 
-        const balanceDisplay = document.getElementById('balance-display');
-        const progressBar = document.getElementById('progress-bar');
-        const itemsGrid = document.getElementById('items-grid');
-        const receiptList = document.getElementById('receipt-list');
-        const receiptTotalVal = document.getElementById('receipt-total-val');
+        const items = [
+            { id:  1, name: 'Big Mac',                   cost:               5 },
+            { id:  2, name: 'Flip Flops',                cost:              15 },
+            { id:  3, name: 'Video Game',                cost:              60 },
+            { id:  4, name: 'AirPods Max',               cost:             550 },
+            { id:  5, name: 'Gaming Rig PC',             cost:           3_500 },
+            { id:  6, name: 'Rolex Watch',               cost:          14_000 },
+            { id:  7, name: 'Tesla Cybertruck',          cost:         100_000 },
+            { id:  8, name: 'Suburban Home',             cost:         500_000 },
+            { id:  9, name: "McDonald's Franchise",      cost:       1_500_000 },
+            { id: 10, name: 'Super Bowl Commercial',     cost:       7_000_000 },
+            { id: 11, name: 'Tropical Private Island',   cost:      18_000_000 },
+            { id: 12, name: 'Falcon Heavy Launch',       cost:      90_000_000 },
+            { id: 13, name: 'Boeing 747',                cost:     400_000_000 },
+            { id: 14, name: 'Mona Lisa',                 cost:     860_000_000 },
+            { id: 15, name: 'NBA Franchise',             cost:   3_200_000_000 },
+            { id: 16, name: 'AAA Gaming Studio',         cost:   7_500_000_000 },
+            { id: 17, name: 'AI Supercomputer Cluster',  cost:  18_000_000_000 },
+            { id: 18, name: 'Commercial Moon Base',      cost:  45_000_000_000 }
+        ].map(i => ({ ...i, count: 0 }));
+
+        function fmt(v) { return '$' + v.toLocaleString('en-US'); }
+
+        const balanceDisplay   = document.getElementById('balance-display');
+        const progressBar      = document.getElementById('progress-bar');
+        const itemsGrid        = document.getElementById('items-grid');
+        const receiptList      = document.getElementById('receipt-list');
+        const receiptTotalVal  = document.getElementById('receipt-total-val');
+        const brokeOverlay     = document.getElementById('broke-overlay');
+
+        function showToast(title, message) {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerHTML = `<div class="toast-label">${title}</div>${message}`;
+            container.appendChild(t);
+            setTimeout(() => t.remove(), 3100);
+        }
+
+        function checkMilestones() {
+            const spent = INITIAL_MONEY - money;
+
+            if (!milestonesFired.has('first') && spent > 0) {
+                milestonesFired.add('first');
+                showToast('First Purchase', 'The spending begins. No going back.');
+            }
+            if (!milestonesFired.has('1b') && spent >= 1_000_000_000) {
+                milestonesFired.add('1b');
+                showToast('Milestone', 'You have spent over $1 Billion.');
+            }
+            if (!milestonesFired.has('10b') && spent >= 10_000_000_000) {
+                milestonesFired.add('10b');
+                showToast('Milestone', 'You have crossed the $10 Billion mark.');
+            }
+            if (!milestonesFired.has('100b') && spent >= 100_000_000_000) {
+                milestonesFired.add('100b');
+                showToast('Milestone', 'Over $100 Billion spent. The end is near.');
+            }
+            if (money <= 0) {
+                brokeOverlay.classList.add('active');
+            }
+        }
 
         function renderGrid() {
             itemsGrid.innerHTML = '';
             items.forEach(item => {
+                const tier = getTier(item.cost);
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <div class="item-icon">${item.icon}</div>
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-cost">${formatCurrency(item.cost)}</div>
+                    <div>
+                        <div class="item-tier ${tier.cls}">${tier.label}</div>
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-cost">${fmt(item.cost)}</div>
+                    </div>
                     <div class="item-actions">
-                        <button class="btn-action btn-sell" onclick="sellItem(${item.id})" ${item.count === 0 ? 'disabled' : ''}>Sell</button>
+                        <button class="btn-action btn-sell" data-id="${item.id}" ${item.count === 0 ? 'disabled' : ''}>Sell</button>
                         <span class="item-count" id="count-${item.id}">${item.count}</span>
-                        <button class="btn-action btn-buy" onclick="buyItem(${item.id})" ${money < item.cost ? 'disabled' : ''}>Buy</button>
+                        <button class="btn-action btn-buy"  data-id="${item.id}" ${money < item.cost ? 'disabled' : ''}>Buy</button>
                     </div>
                 `;
                 itemsGrid.appendChild(card);
@@ -383,70 +509,77 @@
         }
 
         function updateUI() {
-            balanceDisplay.textContent = formatCurrency(money);
-            const spent = INITIAL_MONEY - money;
-            const percentage = (spent / INITIAL_MONEY) * 100;
-            progressBar.style.width = percentage + '%';
+            balanceDisplay.textContent = fmt(money);
+            balanceDisplay.classList.toggle('negative', money <= 0);
 
-            // Update item counts and button states
+            const spent = INITIAL_MONEY - money;
+            progressBar.style.width = ((spent / INITIAL_MONEY) * 100) + '%';
+
             items.forEach(item => {
-                const countElem = document.getElementById(`count-${item.id}`);
-                if (countElem) {
-                    countElem.textContent = item.count;
-                    const card = countElem.closest('.card');
-                    const sellBtn = card.querySelector('.btn-sell');
-                    const buyBtn = card.querySelector('.btn-buy');
-                    sellBtn.disabled = item.count === 0;
-                    buyBtn.disabled = money < item.cost;
-                }
+                const countEl = document.getElementById(`count-${item.id}`);
+                if (!countEl) return;
+                countEl.textContent = item.count;
+                const card    = countEl.closest('.card');
+                card.querySelector('.btn-sell').disabled = item.count === 0;
+                card.querySelector('.btn-buy').disabled  = money < item.cost;
             });
 
-            // Receipt
-            const boughtItems = items.filter(i => i.count > 0);
-            if (boughtItems.length === 0) {
-                receiptList.innerHTML = `<li class="empty-receipt">You haven't bought anything yet! Start spending billions.</li>`;
+            const bought = items.filter(i => i.count > 0);
+            if (bought.length === 0) {
+                receiptList.innerHTML = '<li class="empty-receipt">Nothing purchased yet. Start spending.</li>';
                 receiptTotalVal.textContent = '$0';
             } else {
-                receiptList.innerHTML = boughtItems.map(i => `
-                    <li class="receipt-item">
-                        <span>${i.icon} ${i.name} x${i.count}</span>
-                        <span>${formatCurrency(i.cost * i.count)}</span>
-                    </li>
-                `).join('');
-                receiptTotalVal.textContent = formatCurrency(spent);
+                receiptList.innerHTML = bought.map(i =>
+                    `<li class="receipt-item"><span>${i.name} ×${i.count}</span><span>${fmt(i.cost * i.count)}</span></li>`
+                ).join('');
+                receiptTotalVal.textContent = fmt(spent);
             }
         }
 
-        window.buyItem = function(id) {
+        itemsGrid.addEventListener('click', e => {
+            const btn = e.target.closest('[data-id]');
+            if (!btn) return;
+            const id   = +btn.dataset.id;
             const item = items.find(i => i.id === id);
-            if (item && money >= item.cost) {
+            if (!item) return;
+
+            if (btn.classList.contains('btn-buy') && money >= item.cost) {
                 money -= item.cost;
                 item.count++;
+                checkMilestones();
                 updateUI();
-            }
-        };
-
-        window.sellItem = function(id) {
-            const item = items.find(i => i.id === id);
-            if (item && item.count > 0) {
+            } else if (btn.classList.contains('btn-sell') && item.count > 0) {
                 money += item.cost;
                 item.count--;
+                brokeOverlay.classList.remove('active');
                 updateUI();
             }
-        };
+        });
 
         document.getElementById('btn-reset').addEventListener('click', () => {
             money = INITIAL_MONEY;
             items.forEach(i => i.count = 0);
+            milestonesFired.clear();
+            brokeOverlay.classList.remove('active');
+            updateUI();
+        });
+
+        document.getElementById('btn-recover').addEventListener('click', () => {
+            money = INITIAL_MONEY;
+            items.forEach(i => i.count = 0);
+            milestonesFired.clear();
+            brokeOverlay.classList.remove('active');
             updateUI();
         });
 
         document.getElementById('btn-random').addEventListener('click', () => {
-            const affordableItems = items.filter(i => i.cost <= money);
-            if (affordableItems.length > 0) {
-                const randomItem = affordableItems[Math.floor(Math.random() * affordableItems.length)];
-                buyItem(randomItem.id);
-            }
+            const affordable = items.filter(i => i.cost <= money);
+            if (!affordable.length) return;
+            const pick = affordable[Math.floor(Math.random() * affordable.length)];
+            money -= pick.cost;
+            pick.count++;
+            checkMilestones();
+            updateUI();
         });
 
         renderGrid();

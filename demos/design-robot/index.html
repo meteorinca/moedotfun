@@ -4,38 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Design the Next Robot | moedotfun</title>
+    <meta name="description" content="Customize a geometric sci-fi robot with modular components and generate its spec sheet.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
             --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.4);
+            --accent-glow: rgba(59, 130, 246, 0.35);
             --bg: #090d16;
             --card-bg: rgba(22, 31, 49, 0.7);
-            --border: rgba(255, 255, 255, 0.12);
+            --border: rgba(255, 255, 255, 0.1);
             --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Outfit', sans-serif;
             background: radial-gradient(circle at center, #111827 0%, #080c14 100%);
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 4rem;
+            padding-bottom: 5rem;
         }
 
         header {
-            background: rgba(9, 13, 22, 0.85);
+            background: rgba(9, 13, 22, 0.9);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border);
-            padding: 1.25rem 2rem;
+            padding: 1.1rem 2rem;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -50,14 +48,17 @@
         }
 
         .back-link {
-            color: #9ca3af;
+            color: var(--text-muted);
             text-decoration: none;
             font-weight: 600;
+            font-size: 0.9rem;
             transition: color 0.2s;
         }
+        .back-link:hover { color: var(--accent); }
 
-        .back-link:hover {
-            color: var(--accent);
+        .header-title {
+            font-size: 1.15rem;
+            font-weight: 800;
         }
 
         main {
@@ -69,357 +70,634 @@
             gap: 2.5rem;
         }
 
-        @media (max-width: 900px) {
-            main {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 860px) {
+            main { grid-template-columns: 1fr; }
         }
 
+        /* Preview panel */
         .preview-panel {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 24px;
+            border-radius: 22px;
             padding: 2rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             backdrop-filter: blur(12px);
             position: relative;
             min-height: 520px;
+            gap: 1.5rem;
         }
 
+        /* Robot SVG stage */
         .robot-stage {
-            width: 320px;
-            height: 380px;
             position: relative;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
 
-        /* SVG Robot Parts Styling */
         .robot-aura {
             position: absolute;
-            width: 250px;
-            height: 250px;
+            width: 200px;
+            height: 200px;
             border-radius: 50%;
             background: var(--accent-glow);
-            filter: blur(50px);
-            z-index: 0;
-            transition: background 0.3s ease;
+            filter: blur(55px);
+            pointer-events: none;
+            transition: background 0.4s ease;
         }
 
-        .robot-head {
+        #robot-svg {
             position: relative;
             z-index: 2;
-            transition: all 0.3s;
+            overflow: visible;
+            transition: filter 0.3s;
         }
 
-        .robot-face {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2.2rem;
-            z-index: 3;
-            user-select: none;
+        /* Breathing animation */
+        @keyframes breathe {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(3px); }
+        }
+        #robot-main-group {
+            animation: breathe 4s ease-in-out infinite;
         }
 
-        .robot-body {
-            position: relative;
-            z-index: 2;
-            margin-top: 10px;
-            transition: all 0.3s;
+        /* Combat pulse for weapon arms */
+        @keyframes combatBreath {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(2px); }
+        }
+        #robot-main-group.combat {
+            animation: combatBreath 1.8s ease-in-out infinite;
         }
 
-        .robot-arms {
-            position: absolute;
+        /* Spec box */
+        .spec-box {
+            background: rgba(9, 13, 22, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1.25rem 1.4rem;
             width: 100%;
-            display: flex;
-            justify-content: space-between;
-            top: 130px;
-            z-index: 3;
-            font-size: 3rem;
-            padding: 0 10px;
         }
 
-        .robot-base {
-            position: relative;
-            z-index: 1;
-            margin-top: 5px;
-            font-size: 3.5rem;
-            transition: all 0.3s;
+        .spec-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            opacity: 0.6;
         }
 
-        /* Customize Panel */
+        .spec-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.9rem;
+        }
+
+        .spec-item {}
+
+        .spec-label {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+
+        .spec-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-top: 0.1rem;
+            transition: color 0.3s;
+        }
+
+        .btn-copy-code {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 0.55rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+            margin-top: 0.75rem;
+        }
+        .btn-copy-code:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-main);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .btn-copy-code.copied {
+            border-color: rgba(16,185,129,0.5);
+            color: #6ee7b7;
+        }
+
+        /* Controls panel */
         .controls-panel {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1.25rem;
         }
 
         .control-group {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.25rem 1.5rem;
+            border-radius: 18px;
+            padding: 1.1rem 1.3rem;
         }
 
         .group-title {
-            font-size: 1.1rem;
+            font-size: 0.7rem;
             font-weight: 700;
             margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .options-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 0.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 0.45rem;
         }
 
-        .option-btn {
-            background: rgba(255,255,255,0.06);
+        .opt-btn {
+            background: rgba(255,255,255,0.04);
             border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 0.6rem 0.8rem;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.9rem;
+            color: var(--text-muted);
+            padding: 0.55rem 0.7rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.8rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.18s;
             text-align: center;
+            letter-spacing: 0.2px;
         }
-
-        .option-btn:hover {
-            background: rgba(255,255,255,0.12);
-        }
-
-        .option-btn.active {
+        .opt-btn:hover { background: rgba(255,255,255,0.09); color: var(--text-main); }
+        .opt-btn.active {
             background: var(--accent);
             border-color: var(--accent);
-            color: #ffffff;
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
-
-        .stats-box {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            width: 100%;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 0.75rem;
-        }
-
-        .stat-item {
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: #9ca3af;
-            text-transform: uppercase;
-        }
-
-        .stat-val {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 14px var(--accent-glow);
         }
 
         .color-picker {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.7rem;
+            flex-wrap: wrap;
         }
 
         .color-dot {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             cursor: pointer;
             border: 2px solid transparent;
-            transition: transform 0.2s;
+            transition: transform 0.18s, border-color 0.18s;
         }
-
-        .color-dot:hover {
-            transform: scale(1.15);
-        }
-
-        .color-dot.active {
-            border-color: #ffffff;
-        }
+        .color-dot:hover  { transform: scale(1.15); }
+        .color-dot.active { border-color: rgba(255,255,255,0.8); }
     </style>
 </head>
 <body>
     <header>
         <div class="header-content">
             <a href="../../index.html" class="back-link">← Back to moedotfun</a>
-            <h1 style="font-size: 1.4rem; font-weight: 800;">Design the Next Robot 🤖</h1>
+            <h1 class="header-title">Design the Next Robot</h1>
             <div></div>
         </div>
     </header>
 
     <main>
+        <!-- Preview -->
         <section class="preview-panel">
             <div class="robot-stage">
                 <div class="robot-aura" id="r-aura"></div>
-                <div class="robot-head" id="r-head">
-                    <svg width="120" height="90" viewBox="0 0 120 90">
-                        <rect id="head-shape" x="10" y="10" width="100" height="70" rx="20" fill="#3b82f6" stroke="#ffffff" stroke-width="2"/>
-                    </svg>
-                    <div class="robot-face" id="r-face">😊</div>
-                </div>
-                <div class="robot-arms">
-                    <span id="r-arm-l">🦾</span>
-                    <span id="r-arm-r">🦾</span>
-                </div>
-                <div class="robot-body" id="r-body">
-                    <svg width="140" height="110" viewBox="0 0 140 110">
-                        <rect id="body-shape" x="15" y="10" width="110" height="90" rx="15" fill="#1e293b" stroke="#ffffff" stroke-width="2"/>
-                        <circle cx="70" cy="55" r="20" fill="#3b82f6" opacity="0.8"/>
-                    </svg>
-                </div>
-                <div class="robot-base" id="r-base">🚀</div>
+                <svg id="robot-svg" viewBox="0 0 220 370" width="220" height="370">
+                    <!-- Antenna (static, not in breathe group) -->
+                    <line x1="110" y1="10" x2="110" y2="34" stroke="var(--accent)" stroke-width="1.5" opacity="0.7"/>
+                    <circle cx="110" cy="7" r="5" fill="var(--accent)" opacity="0.9"/>
+
+                    <!-- Main robot group (breathing) -->
+                    <g id="robot-main-group">
+                        <!-- Head -->
+                        <rect x="54" y="34" width="112" height="76" rx="16"
+                              fill="#1a2540" stroke="var(--accent)" stroke-width="1.5" opacity="0.95"/>
+                        <!-- Head details: side bolts -->
+                        <circle cx="59"  cy="55" r="3" fill="#0f172a" stroke="var(--accent)" stroke-width="1" opacity="0.6"/>
+                        <circle cx="161" cy="55" r="3" fill="#0f172a" stroke="var(--accent)" stroke-width="1" opacity="0.6"/>
+
+                        <!-- Face -->
+                        <g id="face-group"></g>
+
+                        <!-- Neck -->
+                        <rect x="88" y="110" width="44" height="12" rx="4" fill="#111e35"/>
+                        <line x1="98" y1="110" x2="98" y2="122" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                        <line x1="110" y1="110" x2="110" y2="122" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                        <line x1="122" y1="110" x2="122" y2="122" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                        <!-- Body -->
+                        <rect x="40" y="122" width="140" height="106" rx="14"
+                              fill="#1a2540" stroke="var(--accent)" stroke-width="1.5" opacity="0.9"/>
+                        <!-- Body panel lines -->
+                        <line x1="55" y1="140" x2="55" y2="210" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                        <line x1="165" y1="140" x2="165" y2="210" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                        <!-- Shoulder joints -->
+                        <circle cx="40"  cy="138" r="7" fill="#111e35" stroke="var(--accent)" stroke-width="1.2" opacity="0.7"/>
+                        <circle cx="180" cy="138" r="7" fill="#111e35" stroke="var(--accent)" stroke-width="1.2" opacity="0.7"/>
+                        <!-- Chest ring -->
+                        <circle cx="110" cy="175" r="28" fill="#0f172a" stroke="var(--accent)" stroke-width="1.2" opacity="0.65"/>
+                        <!-- Core -->
+                        <circle cx="110" cy="175" r="14" fill="var(--accent)" opacity="0.7">
+                            <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="110" cy="175" r="6" fill="#fff" opacity="0.5"/>
+                        <!-- Status lights -->
+                        <circle cx="68" cy="135" r="3" fill="var(--accent)" opacity="0.8">
+                            <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="80" cy="135" r="3" fill="var(--accent)" opacity="0.5">
+                            <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.4s" repeatCount="indefinite"/>
+                        </circle>
+
+                        <!-- Arms -->
+                        <g id="arm-group"></g>
+
+                        <!-- Base -->
+                        <g id="base-group"></g>
+                    </g>
+                </svg>
             </div>
 
-            <div class="stats-box">
-                <h3 style="font-size: 1.1rem; font-weight: 800;">Robot Spec Breakdown</h3>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-label">AI Processing</div>
-                        <div class="stat-val" id="stat-flops">9,400 PFLOPS</div>
+            <!-- Spec sheet -->
+            <div class="spec-box">
+                <div class="spec-title">Unit Specifications</div>
+                <div class="spec-grid">
+                    <div class="spec-item">
+                        <div class="spec-label">Threat Level</div>
+                        <div class="spec-val" id="spec-threat">Scout</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Chaos Factor</div>
-                        <div class="stat-val" id="stat-chaos">12%</div>
+                    <div class="spec-item">
+                        <div class="spec-label">Mobility Class</div>
+                        <div class="spec-val" id="spec-mobility">Wheeled</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Coffee Brew Speed</div>
-                        <div class="stat-val" id="stat-coffee">45 cups/min</div>
+                    <div class="spec-item">
+                        <div class="spec-label">AI Mode</div>
+                        <div class="spec-val" id="spec-ai">Standard</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Coolness Index</div>
-                        <div class="stat-val" id="stat-cool">OVER 9000</div>
+                    <div class="spec-item">
+                        <div class="spec-label">Unit Code</div>
+                        <div class="spec-val" id="spec-code">UNIT-000</div>
                     </div>
                 </div>
+                <button class="btn-copy-code" id="btn-copy">Copy Config String</button>
             </div>
         </section>
 
+        <!-- Controls -->
         <section class="controls-panel">
             <div class="control-group">
-                <div class="group-title">1. Aura Glow Color</div>
+                <div class="group-title">Core Color</div>
                 <div class="color-picker" id="color-picker">
-                    <div class="color-dot active" style="background: #3b82f6;" data-color="#3b82f6" data-glow="rgba(59, 130, 246, 0.4)"></div>
-                    <div class="color-dot" style="background: #ec4899;" data-color="#ec4899" data-glow="rgba(236, 72, 153, 0.4)"></div>
-                    <div class="color-dot" style="background: #10b981;" data-color="#10b981" data-glow="rgba(16, 185, 129, 0.4)"></div>
-                    <div class="color-dot" style="background: #f59e0b;" data-color="#f59e0b" data-glow="rgba(245, 158, 11, 0.4)"></div>
-                    <div class="color-dot" style="background: #8b5cf6;" data-color="#8b5cf6" data-glow="rgba(139, 92, 246, 0.4)"></div>
+                    <div class="color-dot active" style="background:#3b82f6" data-color="#3b82f6" data-glow="rgba(59,130,246,0.35)"></div>
+                    <div class="color-dot" style="background:#10b981" data-color="#10b981" data-glow="rgba(16,185,129,0.35)"></div>
+                    <div class="color-dot" style="background:#f59e0b" data-color="#f59e0b" data-glow="rgba(245,158,11,0.35)"></div>
+                    <div class="color-dot" style="background:#ec4899" data-color="#ec4899" data-glow="rgba(236,72,153,0.35)"></div>
+                    <div class="color-dot" style="background:#a855f7" data-color="#a855f7" data-glow="rgba(168,85,247,0.35)"></div>
+                    <div class="color-dot" style="background:#ef4444" data-color="#ef4444" data-glow="rgba(239,68,68,0.35)"></div>
+                    <div class="color-dot" style="background:#e2e8f0" data-color="#e2e8f0" data-glow="rgba(226,232,240,0.25)"></div>
                 </div>
             </div>
 
             <div class="control-group">
-                <div class="group-title">2. Facial Expression</div>
-                <div class="options-grid" id="faces-grid"></div>
+                <div class="group-title">Visual Mode</div>
+                <div class="options-grid" id="face-grid"></div>
             </div>
 
             <div class="control-group">
-                <div class="group-title">3. Arm Attachments</div>
-                <div class="options-grid" id="arms-grid"></div>
+                <div class="group-title">Arm Configuration</div>
+                <div class="options-grid" id="arm-grid"></div>
             </div>
 
             <div class="control-group">
-                <div class="group-title">4. Propulsion Base</div>
+                <div class="group-title">Locomotion System</div>
                 <div class="options-grid" id="base-grid"></div>
             </div>
         </section>
     </main>
 
     <script>
+        // ─── SVG Part Definitions ────────────────────────────────────────────
+
         const faces = [
-            { icon: "😊", name: "Happy LED" },
-            { icon: "😎", name: "Cool Shades" },
-            { icon: "👾", name: "Glitch Pixel" },
-            { icon: "😍", name: "Heart Eyes" },
-            { icon: "😜", name: "Wink & Tongue" },
-            { icon: "🤖", name: "Classic Bot" }
+            {
+                name: 'Standard',
+                aiMode: 'Standard',
+                svg: `
+                    <circle cx="84" cy="73" r="13" fill="var(--accent)" opacity="0.9"/>
+                    <circle cx="136" cy="73" r="13" fill="var(--accent)" opacity="0.9"/>
+                    <circle cx="88" cy="70" r="5.5" fill="#050c1a"/>
+                    <circle cx="140" cy="70" r="5.5" fill="#050c1a"/>
+                    <circle cx="90" cy="68" r="2" fill="rgba(255,255,255,0.6)"/>
+                    <circle cx="142" cy="68" r="2" fill="rgba(255,255,255,0.6)"/>
+                `
+            },
+            {
+                name: 'Alert',
+                aiMode: 'Combat',
+                svg: `
+                    <polygon points="84,60 97,73 84,86 71,73" fill="var(--accent)" opacity="0.9"/>
+                    <polygon points="136,60 149,73 136,86 123,73" fill="var(--accent)" opacity="0.9"/>
+                    <circle cx="84"  cy="73" r="4.5" fill="#050c1a"/>
+                    <circle cx="136" cy="73" r="4.5" fill="#050c1a"/>
+                `
+            },
+            {
+                name: 'Scan',
+                aiMode: 'Recon',
+                svg: `
+                    <rect x="64" y="67" width="92" height="12" rx="3" fill="var(--accent)" opacity="0.15"/>
+                    <rect x="64" y="67" width="92" height="12" rx="3" fill="none" stroke="var(--accent)" stroke-width="1" opacity="0.5"/>
+                    <rect id="scan-beam" x="64" y="67" width="20" height="12" rx="2" fill="var(--accent)" opacity="0.8">
+                        <animate attributeName="x" values="64;136;64" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+                    </rect>
+                    <line x1="64" y1="73" x2="156" y2="73" stroke="var(--accent)" stroke-width="0.5" opacity="0.3"/>
+                `
+            },
+            {
+                name: 'Glitch',
+                aiMode: 'Corrupted',
+                svg: `
+                    <rect x="70" y="65" width="22" height="14" rx="2" fill="var(--accent)" opacity="0.9"/>
+                    <rect x="73" y="77" width="15" height="5"  rx="1" fill="var(--accent)" opacity="0.4"/>
+                    <rect x="126" y="68" width="24" height="10" rx="2" fill="var(--accent)" opacity="0.9"/>
+                    <rect x="128" y="62" width="16" height="6"  rx="1" fill="var(--accent)" opacity="0.35"/>
+                    <rect x="130" y="76" width="18" height="5"  rx="1" fill="var(--accent)" opacity="0.5"/>
+                    <line x1="92" y1="69" x2="124" y2="72" stroke="var(--accent)" stroke-width="0.5" opacity="0.25"/>
+                `
+            },
+            {
+                name: 'Cyclops',
+                aiMode: 'Singular',
+                svg: `
+                    <circle cx="110" cy="72" r="22" fill="var(--accent)" opacity="0.85"/>
+                    <circle cx="110" cy="72" r="12" fill="#050c1a"/>
+                    <circle cx="115" cy="68" r="5"  fill="var(--accent)" opacity="0.7"/>
+                    <circle cx="116" cy="67" r="2"  fill="rgba(255,255,255,0.7)"/>
+                `
+            },
+            {
+                name: 'Night',
+                aiMode: 'Stealth',
+                svg: `
+                    <circle cx="84"  cy="73" r="14" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.7"/>
+                    <circle cx="84"  cy="73" r="9"  fill="var(--accent)" opacity="0.6"/>
+                    <circle cx="84"  cy="73" r="4.5" fill="#050c1a"/>
+                    <circle cx="136" cy="73" r="14" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.7"/>
+                    <circle cx="136" cy="73" r="9"  fill="var(--accent)" opacity="0.6"/>
+                    <circle cx="136" cy="73" r="4.5" fill="#050c1a"/>
+                `
+            }
         ];
 
         const arms = [
-            { icon: "🦾", name: "Cyber Mech" },
-            { icon: "⚡", name: "Laser Arc" },
-            { icon: "☕", name: "Espresso Arms" },
-            { icon: "🧲", name: "Magnet Claws" },
-            { icon: "🎸", name: "Guitar Shredder" }
+            {
+                name: 'Standard',
+                threat: 20,
+                combat: false,
+                svg: `
+                    <rect x="11" y="130" width="29" height="68" rx="9" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <rect x="180" y="130" width="29" height="68" rx="9" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <rect x="16" y="185" width="19" height="10" rx="4" fill="#111e35" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                    <rect x="185" y="185" width="19" height="10" rx="4" fill="#111e35" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                `
+            },
+            {
+                name: 'Claw',
+                threat: 70,
+                combat: true,
+                svg: `
+                    <rect x="13" y="130" width="26" height="56" rx="7" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <line x1="17" y1="186" x2="11" y2="204" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="26" y1="186" x2="26" y2="206" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="35" y1="186" x2="41" y2="204" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+                    <rect x="181" y="130" width="26" height="56" rx="7" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <line x1="185" y1="186" x2="179" y2="204" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="194" y1="186" x2="194" y2="206" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="203" y1="186" x2="209" y2="204" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+                `
+            },
+            {
+                name: 'Blade',
+                threat: 90,
+                combat: true,
+                svg: `
+                    <polygon points="11,130 39,130 34,195 16,195" fill="#1a2540" stroke="var(--accent)" stroke-width="1.5"/>
+                    <line x1="25" y1="195" x2="22" y2="215" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+                    <polygon points="181,130 209,130 204,195 186,195" fill="#1a2540" stroke="var(--accent)" stroke-width="1.5"/>
+                    <line x1="195" y1="195" x2="192" y2="215" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+                `
+            },
+            {
+                name: 'Shield',
+                threat: 45,
+                combat: false,
+                svg: `
+                    <rect x="5" y="128" width="35" height="62" rx="11" fill="#1a2540" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                    <rect x="9" y="134" width="27" height="50" rx="7" fill="#0f172a" stroke="var(--accent)" stroke-width="1" opacity="0.6"/>
+                    <line x1="22" y1="140" x2="22" y2="178" stroke="var(--accent)" stroke-width="0.8" opacity="0.3"/>
+                    <rect x="180" y="128" width="35" height="62" rx="11" fill="#1a2540" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                    <rect x="184" y="134" width="27" height="50" rx="7" fill="#0f172a" stroke="var(--accent)" stroke-width="1" opacity="0.6"/>
+                    <line x1="197" y1="140" x2="197" y2="178" stroke="var(--accent)" stroke-width="0.8" opacity="0.3"/>
+                `
+            },
+            {
+                name: 'Multi-Joint',
+                threat: 80,
+                combat: true,
+                svg: `
+                    <rect x="14" y="128" width="24" height="34" rx="7" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <circle cx="26" cy="165" r="7" fill="#1a2540" stroke="var(--accent)" stroke-width="1.5"/>
+                    <rect x="10" y="168" width="30" height="28" rx="7" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" transform="rotate(-8, 25, 182)"/>
+                    <rect x="182" y="128" width="24" height="34" rx="7" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <circle cx="194" cy="165" r="7" fill="#1a2540" stroke="var(--accent)" stroke-width="1.5"/>
+                    <rect x="180" y="168" width="30" height="28" rx="7" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" transform="rotate(8, 195, 182)"/>
+                `
+            }
         ];
 
         const bases = [
-            { icon: "🚀", name: "Rocket Jet" },
-            { icon: "🛞", name: "Cyber Wheel" },
-            { icon: "🛸", name: "Hover Disk" },
-            { icon: "🦵", name: "Bipedal Legs" },
-            { icon: "🚜", name: "Tank Treads" }
+            {
+                name: 'Wheel Drive',
+                mobility: 'Wheeled',
+                speed: 45,
+                svg: `
+                    <rect x="52" y="228" width="116" height="8" rx="2" fill="#111e35"/>
+                    <circle cx="83"  cy="260" r="22" fill="#1a2540" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+                    <circle cx="83"  cy="260" r="10" fill="#0f172a" stroke="var(--accent)" stroke-width="1.5"/>
+                    <circle cx="137" cy="260" r="22" fill="#1a2540" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+                    <circle cx="137" cy="260" r="10" fill="#0f172a" stroke="var(--accent)" stroke-width="1.5"/>
+                    <line x1="83" y1="238" x2="137" y2="238" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+                `
+            },
+            {
+                name: 'Rocket Jets',
+                mobility: 'Airborne',
+                speed: 90,
+                svg: `
+                    <rect x="64" y="230" width="32" height="26" rx="4" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <polygon points="64,256 96,256 90,282 70,282" fill="#1a2540" stroke="var(--accent)" stroke-width="1.5"/>
+                    <rect x="71" y="276" width="18" height="8" rx="2" fill="var(--accent)" opacity="0.7">
+                        <animate attributeName="opacity" values="0.3;0.9;0.3" dur="0.5s" repeatCount="indefinite"/>
+                    </rect>
+                    <rect x="124" y="230" width="32" height="26" rx="4" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <polygon points="124,256 156,256 150,282 130,282" fill="#1a2540" stroke="var(--accent)" stroke-width="1.5"/>
+                    <rect x="131" y="276" width="18" height="8" rx="2" fill="var(--accent)" opacity="0.7">
+                        <animate attributeName="opacity" values="0.9;0.3;0.9" dur="0.5s" repeatCount="indefinite"/>
+                    </rect>
+                `
+            },
+            {
+                name: 'Hover Disk',
+                mobility: 'Hover',
+                speed: 70,
+                svg: `
+                    <ellipse cx="110" cy="248" rx="70" ry="20" fill="#1a2540" stroke="var(--accent)" stroke-width="1.5"/>
+                    <ellipse cx="110" cy="248" rx="52" ry="12" fill="#0f172a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                    <ellipse cx="110" cy="248" rx="30" ry="6" fill="var(--accent)" opacity="0.35">
+                        <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite"/>
+                    </ellipse>
+                `
+            },
+            {
+                name: 'Bipedal',
+                mobility: 'Bipedal',
+                speed: 55,
+                svg: `
+                    <rect x="80" y="228" width="20" height="58" rx="6" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <rect x="70" y="280" width="36" height="10" rx="4" fill="#1a2540" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <rect x="120" y="228" width="20" height="58" rx="6" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <rect x="114" y="280" width="36" height="10" rx="4" fill="#1a2540" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                `
+            },
+            {
+                name: 'Tank Treads',
+                mobility: 'All-Terrain',
+                speed: 65,
+                svg: `
+                    <rect x="44" y="230" width="50" height="30" rx="11" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <circle cx="55" cy="245" r="8" fill="#0f172a" stroke="var(--accent)" stroke-width="1"/>
+                    <circle cx="69" cy="245" r="8" fill="#0f172a" stroke="var(--accent)" stroke-width="1"/>
+                    <circle cx="83" cy="245" r="8" fill="#0f172a" stroke="var(--accent)" stroke-width="1"/>
+                    <rect x="126" y="230" width="50" height="30" rx="11" fill="#1a2540" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                    <circle cx="137" cy="245" r="8" fill="#0f172a" stroke="var(--accent)" stroke-width="1"/>
+                    <circle cx="151" cy="245" r="8" fill="#0f172a" stroke="var(--accent)" stroke-width="1"/>
+                    <circle cx="165" cy="245" r="8" fill="#0f172a" stroke="var(--accent)" stroke-width="1"/>
+                `
+            }
         ];
 
-        const rFace = document.getElementById('r-face');
-        const rArmL = document.getElementById('r-arm-l');
-        const rArmR = document.getElementById('r-arm-r');
-        const rBase = document.getElementById('r-base');
-        const rAura = document.getElementById('r-aura');
-        const headShape = document.getElementById('head-shape');
+        // ─── State ───────────────────────────────────────────────────────────
 
-        function createOptions(items, containerId, onClick) {
-            const container = document.getElementById(containerId);
-            items.forEach((item, index) => {
+        let selectedFace  = 0;
+        let selectedArm   = 0;
+        let selectedBase  = 0;
+        let selectedColor = '#3b82f6';
+        let selectedGlow  = 'rgba(59,130,246,0.35)';
+
+        const faceGroup  = document.getElementById('face-group');
+        const armGroup   = document.getElementById('arm-group');
+        const baseGroup  = document.getElementById('base-group');
+        const mainGroup  = document.getElementById('robot-main-group');
+        const auraEl     = document.getElementById('r-aura');
+
+        function updateRobot() {
+            faceGroup.innerHTML = faces[selectedFace].svg;
+            armGroup.innerHTML  = arms[selectedArm].svg;
+            baseGroup.innerHTML = bases[selectedBase].svg;
+
+            mainGroup.classList.toggle('combat', arms[selectedArm].combat);
+            updateSpecs();
+        }
+
+        function updateSpecs() {
+            const arm   = arms[selectedArm];
+            const base  = bases[selectedBase];
+            const face  = faces[selectedFace];
+
+            const threatLabel = arm.threat >= 85 ? 'Assault' :
+                                arm.threat >= 70 ? 'Hunter'  :
+                                arm.threat >= 45 ? 'Guardian':
+                                                   'Scout';
+
+            document.getElementById('spec-threat').textContent   = threatLabel;
+            document.getElementById('spec-mobility').textContent = base.mobility;
+            document.getElementById('spec-ai').textContent       = face.aiMode;
+            document.getElementById('spec-code').textContent     = `UNIT-${selectedFace}${selectedArm}${selectedBase}`;
+        }
+
+        function buildOptions(container, items, key, onChange) {
+            items.forEach((item, idx) => {
                 const btn = document.createElement('button');
-                btn.className = `option-btn ${index === 0 ? 'active' : ''}`;
-                btn.textContent = `${item.icon} ${item.name}`;
-                btn.onclick = () => {
-                    container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+                btn.className = `opt-btn${idx === 0 ? ' active' : ''}`;
+                btn.textContent = item.name;
+                btn.addEventListener('click', () => {
+                    container.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    onClick(item);
-                    randomizeStats();
-                };
+                    onChange(idx);
+                    updateRobot();
+                });
                 container.appendChild(btn);
             });
         }
 
-        createOptions(faces, 'faces-grid', (item) => rFace.textContent = item.icon);
-        createOptions(arms, 'arms-grid', (item) => {
-            rArmL.textContent = item.icon;
-            rArmR.textContent = item.icon;
-        });
-        createOptions(bases, 'base-grid', (item) => rBase.textContent = item.icon);
+        buildOptions(document.getElementById('face-grid'), faces, 'face', i => selectedFace = i);
+        buildOptions(document.getElementById('arm-grid'),  arms,  'arm',  i => selectedArm  = i);
+        buildOptions(document.getElementById('base-grid'), bases, 'base', i => selectedBase = i);
 
-        // Color dots
-        document.querySelectorAll('.color-dot').forEach(dot => {
-            dot.onclick = () => {
-                document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
-                dot.classList.add('active');
-                const color = dot.dataset.color;
-                const glow = dot.dataset.glow;
-                document.documentElement.style.setProperty('--accent', color);
-                document.documentElement.style.setProperty('--accent-glow', glow);
-                headShape.setAttribute('fill', color);
-                randomizeStats();
-            };
+        // Color picker
+        document.getElementById('color-picker').addEventListener('click', e => {
+            const dot = e.target.closest('.color-dot');
+            if (!dot) return;
+            document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+            dot.classList.add('active');
+            selectedColor = dot.dataset.color;
+            selectedGlow  = dot.dataset.glow;
+            document.documentElement.style.setProperty('--accent', selectedColor);
+            document.documentElement.style.setProperty('--accent-glow', selectedGlow);
+            auraEl.style.background = selectedGlow;
+            updateSpecs();
         });
 
-        function randomizeStats() {
-            document.getElementById('stat-flops').textContent = `${(Math.random() * 50000 + 10000).toFixed(0)} PFLOPS`;
-            document.getElementById('stat-chaos').textContent = `${(Math.random() * 90 + 5).toFixed(0)}%`;
-            document.getElementById('stat-coffee').textContent = `${(Math.random() * 100 + 20).toFixed(0)} cups/min`;
-        }
+        // Copy config
+        document.getElementById('btn-copy').addEventListener('click', function () {
+            const cfg = `FACE:${selectedFace}|ARM:${selectedArm}|BASE:${selectedBase}|COLOR:${selectedColor}`;
+            navigator.clipboard.writeText(cfg).then(() => {
+                this.textContent = 'Copied';
+                this.classList.add('copied');
+                setTimeout(() => {
+                    this.textContent = 'Copy Config String';
+                    this.classList.remove('copied');
+                }, 2000);
+            }).catch(() => {
+                this.textContent = `${cfg}`;
+                setTimeout(() => { this.textContent = 'Copy Config String'; }, 3000);
+            });
+        });
+
+        // Init
+        updateRobot();
     </script>
 </body>
 </html>

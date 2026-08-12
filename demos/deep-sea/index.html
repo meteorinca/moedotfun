@@ -3,237 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Deep Sea | moedotfun</title>
+    <title>The Deep Sea Explorer | moedotfun</title>
+    <meta name="description" content="Scroll down 11,000 meters to discover deep ocean creatures and mysteries.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --depth-color: #38bdf8;
-        }
+        :root { --depth-color: #38bdf8; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Outfit', sans-serif;
             color: #ffffff;
             background-color: #030712;
             overflow-x: hidden;
-            position: relative;
         }
 
+        /* Scrollable background */
         #depth-background {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            inset: 0;
             z-index: -1;
-            transition: background 0.3s ease;
             background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+            transition: background 0.6s ease;
         }
 
+        /* Depth scroll progress bar (right edge) */
+        #depth-gauge {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 3px;
+            height: 100vh;
+            background: rgba(255,255,255,0.08);
+            z-index: 200;
+        }
+        #depth-gauge-fill {
+            width: 100%;
+            background: var(--depth-color);
+            height: 0%;
+            transition: height 0.1s linear, background 0.4s ease;
+            box-shadow: 0 0 6px var(--depth-color);
+        }
+
+        /* HUD header */
         .hud-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 100;
-            padding: 1.25rem 2rem;
+            padding: 1.1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(3, 7, 18, 0.7);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(3, 7, 18, 0.75);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
         .back-link {
             color: #9ca3af;
             text-decoration: none;
             font-weight: 600;
+            font-size: 0.9rem;
             transition: color 0.2s;
         }
+        .back-link:hover { color: var(--depth-color); }
 
-        .back-link:hover {
-            color: #38bdf8;
-        }
-
-        .depth-hud {
-            text-align: center;
-        }
+        .depth-hud { text-align: center; }
 
         .depth-value {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 800;
             color: var(--depth-color);
-            text-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+            text-shadow: 0 0 16px rgba(56,189,248,0.5);
+            transition: color 0.4s, text-shadow 0.4s;
         }
 
         .zone-name {
-            font-size: 0.85rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #e2e8f0;
+            letter-spacing: 2.5px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 0.15rem;
         }
 
+        /* Ocean column */
         .ocean-column {
             position: relative;
             width: 100%;
-            height: 25000px; /* Scaled scroll canvas */
+            height: 25000px;
             max-width: 900px;
             margin: 0 auto;
-            padding: 120px 20px 100px 20px;
+            padding: 120px 20px 100px;
         }
 
+        /* Ruler */
         .ruler {
             position: absolute;
             left: 50%;
             top: 100px;
             bottom: 100px;
-            width: 2px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 100%);
+            width: 1px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.04) 100%);
             transform: translateX(-50%);
         }
 
+        /* Zone banners */
         .zone-banner {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 0.75rem 2rem;
+            background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 0.55rem 1.75rem;
             border-radius: 999px;
-            font-size: 1.1rem;
+            font-size: 0.72rem;
             font-weight: 700;
-            letter-spacing: 2px;
+            letter-spacing: 2.5px;
             text-transform: uppercase;
             backdrop-filter: blur(8px);
             z-index: 10;
+            white-space: nowrap;
         }
 
+        /* Creature cards */
         .creature-card {
             position: absolute;
-            width: calc(50% - 40px);
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 1.25rem 1.5rem;
+            width: calc(50% - 50px);
+            background: rgba(10, 18, 40, 0.88);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 18px;
+            padding: 1.1rem 1.3rem;
             backdrop-filter: blur(12px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             cursor: pointer;
             transition: transform 0.2s, border-color 0.2s;
+
+            /* Entrance animation state */
+            opacity: 0;
+            transform: translateX(0) translateY(12px);
+        }
+
+        .creature-card.visible {
+            animation: cardIn 0.5s cubic-bezier(0.2, 0, 0, 1) forwards;
+        }
+
+        .creature-card.left  { left: 0;  --slide-x: -18px; }
+        .creature-card.right { right: 0; --slide-x:  18px; }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateX(var(--slide-x, 0)) translateY(10px); }
+            to   { opacity: 1; transform: translateX(0) translateY(0); }
         }
 
         .creature-card:hover {
-            transform: scale(1.03);
-            border-color: #38bdf8;
+            transform: scale(1.025) translateY(-2px);
+            border-color: var(--depth-color);
         }
 
-        .creature-card.left {
-            left: 0;
-        }
-
-        .creature-card.right {
-            right: 0;
-        }
-
-        .creature-card::after {
+        /* Connector line to ruler */
+        .creature-card.left::after,
+        .creature-card.right::after {
             content: '';
             position: absolute;
             top: 50%;
-            width: 30px;
-            height: 2px;
-            background: rgba(255,255,255,0.3);
+            width: 28px;
+            height: 1px;
+            background: rgba(255,255,255,0.2);
         }
+        .creature-card.left::after  { right: -28px; }
+        .creature-card.right::after { left: -28px; }
 
-        .creature-card.left::after {
-            right: -30px;
-        }
-
-        .creature-card.right::after {
-            left: -30px;
-        }
-
-        .creature-icon {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
+        /* Creature glyph (replaces emoji) */
+        .creature-glyph {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.6rem;
+            color: var(--depth-color);
         }
 
         .creature-name {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
         }
 
         .creature-depth-tag {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            color: #38bdf8;
+            font-size: 0.8rem;
+            color: var(--depth-color);
             margin-bottom: 0.5rem;
+            transition: color 0.4s;
         }
 
         .creature-desc {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #9ca3af;
-            line-height: 1.4;
+            line-height: 1.45;
         }
 
         /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(8px);
-            z-index: 200;
+            background: rgba(0,0,0,0.82);
+            backdrop-filter: blur(10px);
+            z-index: 300;
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.25s ease;
         }
-
         .modal-overlay.active {
             opacity: 1;
             pointer-events: auto;
         }
 
         .modal-box {
-            background: #0f172a;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 24px;
-            max-width: 500px;
+            background: #0a1220;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 22px;
+            max-width: 460px;
             width: 90%;
-            padding: 2rem;
+            padding: 2rem 2.25rem;
             text-align: center;
             position: relative;
+            transform: scale(0.92);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+
+        .modal-glyph {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--depth-color);
+            margin-bottom: 1rem;
         }
 
         .modal-close {
             position: absolute;
             top: 1rem;
-            right: 1.25rem;
+            right: 1.1rem;
             background: none;
             border: none;
-            color: white;
-            font-size: 1.5rem;
+            color: rgba(255,255,255,0.4);
+            font-size: 1.3rem;
             cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+        .modal-close:hover { color: #fff; }
+
+        .modal-name {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+        }
+
+        .modal-depth {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--depth-color);
+            margin-bottom: 1rem;
+        }
+
+        .modal-desc {
+            color: #d1d5db;
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
     <div id="depth-background"></div>
+    <div id="depth-gauge"><div id="depth-gauge-fill"></div></div>
 
     <header class="hud-header">
         <a href="../../index.html" class="back-link">← Back to moedotfun</a>
         <div class="depth-hud">
-            <div class="depth-value" id="hud-depth">0 meters</div>
+            <div class="depth-value" id="hud-depth">0 m</div>
             <div class="zone-name" id="hud-zone">Sunlit Zone</div>
         </div>
         <div></div>
@@ -245,125 +319,144 @@
 
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal-box">
-            <button class="modal-close" onclick="closeModal()">✕</button>
-            <div class="creature-icon" id="m-icon"></div>
-            <h2 class="creature-name" id="m-name"></h2>
-            <div class="creature-depth-tag" id="m-depth"></div>
-            <p class="creature-desc" id="m-desc" style="color: #e2e8f0; font-size: 1rem; margin-top: 1rem;"></p>
+            <button class="modal-close" id="modal-close">&#x2715;</button>
+            <div class="modal-glyph" id="m-glyph"></div>
+            <h2 class="modal-name" id="m-name"></h2>
+            <div class="modal-depth" id="m-depth"></div>
+            <p class="modal-desc" id="m-desc"></p>
         </div>
     </div>
 
     <script>
-        const oceanDepthMax = 11000;
-        const columnHeight = 25000; // total px height
+        const OCEAN_MAX    = 11000;
+        const COLUMN_HEIGHT = 25000;
+
+        const zones = [
+            { depth:     0, name: 'Sunlit Zone',   range: '0 – 200 m' },
+            { depth:   200, name: 'Twilight Zone',  range: '200 – 1,000 m' },
+            { depth:  1000, name: 'Midnight Zone',  range: '1,000 – 4,000 m' },
+            { depth:  4000, name: 'The Abyss',      range: '4,000 – 6,000 m' },
+            { depth:  6000, name: 'The Trenches',   range: '6,000 – 11,000 m' },
+        ];
 
         const creatures = [
-            { depth: 10, name: "Bottlenose Dolphin", icon: "🐬", zone: "Sunlit Zone", desc: "Playful aquatic mammal known for jumping high out of surface waters." },
-            { depth: 40, name: "Scuba Diver Limit", icon: "🤿", zone: "Sunlit Zone", desc: "Recreational scuba diving max depth limit recommended for safety." },
-            { depth: 150, name: "Blue Whale", icon: "🐳", zone: "Sunlit Zone", desc: "The largest animal ever known to have lived on Planet Earth." },
-            { depth: 250, name: "Great White Shark", icon: "🦈", zone: "Twilight Zone", desc: "Apex predator lurking right at the edge of sunlight penetration." },
-            { depth: 500, name: "Giant Pacific Octopus", icon: "🐙", zone: "Twilight Zone", desc: "Highly intelligent predator capable of instant camouflage and color change." },
-            { depth: 900, name: "Giant Squid", icon: "🦑", zone: "Twilight Zone", desc: "Elusive sea monster reaching up to 13 meters in total length with eyes as big as dinner plates." },
-            { depth: 1400, name: "Coelacanth", icon: "🐟", zone: "Midnight Zone", desc: "Prehistoric 'living fossil' fish thought to be extinct for 66 million years until rediscovered." },
-            { depth: 2000, name: "Anglerfish", icon: "🎣", zone: "Midnight Zone", desc: "Uses a bioluminescent glowing lure dangling from its head to attract prey in pitch darkness." },
-            { depth: 2500, name: "Vampire Squid", icon: "🦑", zone: "Midnight Zone", desc: "Produces bioluminescent glowing blue clouds instead of black ink to daze ocean predators." },
-            { depth: 3800, name: "Wreck of the RMS Titanic", icon: "🚢", zone: "Midnight Zone", desc: "Rests silently on the ocean floor since sinking on April 15, 1912." },
-            { depth: 5000, name: "Hydrothermal Vents", icon: "🌋", zone: "The Abyss", desc: "Superheated mineral vents spewing 400°C water that support weird chemosynthetic life." },
-            { depth: 7500, name: "Barreleye Fish", icon: "🐟", zone: "The Trenches", desc: "Has a transparent fluid-filled head exposing green glowing tubular eyes inside." },
-            { depth: 8178, name: "Mariana Snailfish", icon: "🐟", zone: "The Trenches", desc: "The deepest living fish ever recorded alive in ocean history, enduring crushing pressures." },
-            { depth: 10928, name: "Challenger Deep", icon: "🕳️", zone: "The Trenches", desc: "The deepest known point in Earth's seabed oceans, located in the Mariana Trench." }
+            { depth:    10, name: 'Bottlenose Dolphin',     code: 'BDo', zone: 'Sunlit',    desc: 'Playful apex mammal known for leaping clear of the surface and navigating by echolocation.' },
+            { depth:    40, name: 'Recreational Dive Limit',code: 'RDL', zone: 'Sunlit',    desc: 'The maximum depth recommended for recreational scuba divers — beyond this, specialist equipment is required.' },
+            { depth:   150, name: 'Blue Whale',             code: 'BWh', zone: 'Sunlit',    desc: 'The largest animal ever known to have existed — hearts the size of a car, calls audible for hundreds of kilometers.' },
+            { depth:   250, name: 'Great White Shark',      code: 'GWS', zone: 'Twilight',  desc: 'Apex predator routinely hunting at the edge of sunlight penetration. Capable of bursts over 56 km/h.' },
+            { depth:   500, name: 'Giant Pacific Octopus',  code: 'GPO', zone: 'Twilight',  desc: 'Highly intelligent predator capable of instant full-body camouflage. Three hearts, blue blood.' },
+            { depth:   900, name: 'Giant Squid',            code: 'GSQ', zone: 'Twilight',  desc: 'Elusive cephalopod reaching 13 meters in length, with eyes as large as dinner plates — rarely seen alive.' },
+            { depth:  1400, name: 'Coelacanth',             code: 'COE', zone: 'Midnight',  desc: 'A "living fossil" presumed extinct for 66 million years until rediscovered in 1938 off South Africa.' },
+            { depth:  2000, name: 'Anglerfish',             code: 'ANG', zone: 'Midnight',  desc: 'Uses a bioluminescent lure dangling from its skull to attract prey in absolute darkness. Females can engulf males whole.' },
+            { depth:  2500, name: 'Vampire Squid',         code: 'VSQ', zone: 'Midnight',  desc: 'Not a true squid or octopus — its own order. Releases glowing bioluminescent clouds instead of ink to confuse predators.' },
+            { depth:  3800, name: 'Wreck of the Titanic',  code: 'RMS', zone: 'Midnight',  desc: 'Resting silently on the floor of the North Atlantic since April 15, 1912. Deteriorating at roughly 170 kg per day.' },
+            { depth:  4200, name: 'Dumbo Octopus',         code: 'DBO', zone: 'Abyss',     desc: 'Named for ear-like fins that resemble the Disney character. Propels itself through near-freezing water at crushing pressures.' },
+            { depth:  5000, name: 'Hydrothermal Vents',    code: 'HTV', zone: 'Abyss',     desc: 'Superheated mineral vents at 400°C support chemosynthetic ecosystems — life without sunlight, sustained by geological heat.' },
+            { depth:  5500, name: 'Giant Sea Spider',      code: 'GSS', zone: 'Abyss',     desc: 'Deep-sea arthropod reaching over 70 cm leg span. Pumps nutrients via a pumping gut that extends into its legs.' },
+            { depth:  7500, name: 'Barreleye Fish',        code: 'BEF', zone: 'Trenches',  desc: 'Transparent fluid-filled head exposing green tubular eyes that rotate to spot bioluminescent prey from below.' },
+            { depth:  8178, name: 'Mariana Snailfish',     code: 'MSF', zone: 'Trenches',  desc: 'Deepest living fish ever recorded — survives pressures over 800 atmospheres by saturating its tissues with TMAO.' },
+            { depth: 10928, name: 'Challenger Deep',        code: 'CHD', zone: 'Trenches',  desc: 'The deepest known point in any ocean. Located in the Mariana Trench, 36,000 feet below sea level.' },
         ];
 
         const oceanColumn = document.getElementById('ocean-column');
-        const depthBg = document.getElementById('depth-background');
-        const hudDepth = document.getElementById('hud-depth');
-        const hudZone = document.getElementById('hud-zone');
+        const depthBg     = document.getElementById('depth-background');
+        const hudDepth    = document.getElementById('hud-depth');
+        const hudZone     = document.getElementById('hud-zone');
+        const gaugeFill   = document.getElementById('depth-gauge-fill');
 
-        // Render Zone banners & Creature Cards
-        const zones = [
-            { depth: 0, name: "Sunlit Zone (0 - 200m)" },
-            { depth: 200, name: "Twilight Zone (200 - 1,000m)" },
-            { depth: 1000, name: "Midnight Zone (1,000 - 4,000m)" },
-            { depth: 4000, name: "The Abyss (4,000 - 6,000m)" },
-            { depth: 6000, name: "The Trenches (6,000 - 11,000m)" }
-        ];
+        function depthToY(depth) {
+            return (depth / OCEAN_MAX) * (COLUMN_HEIGHT - 200) + 120;
+        }
 
+        // Render zone banners
         zones.forEach(z => {
-            const py = (z.depth / oceanDepthMax) * (columnHeight - 200) + 100;
-            const b = document.createElement('div');
-            b.className = 'zone-banner';
-            b.style.top = py + 'px';
-            b.textContent = z.name;
-            oceanColumn.appendChild(b);
+            const el = document.createElement('div');
+            el.className = 'zone-banner';
+            el.style.top = depthToY(z.depth) + 'px';
+            el.textContent = `${z.name} — ${z.range}`;
+            oceanColumn.appendChild(el);
         });
 
+        // Render creature cards
         creatures.forEach((c, idx) => {
-            const py = (c.depth / oceanDepthMax) * (columnHeight - 200) + 120;
             const card = document.createElement('div');
             card.className = `creature-card ${idx % 2 === 0 ? 'left' : 'right'}`;
-            card.style.top = py + 'px';
+            card.style.top = depthToY(c.depth) + 'px';
             card.innerHTML = `
-                <div class="creature-icon">${c.icon}</div>
+                <div class="creature-glyph">${c.code}</div>
                 <div class="creature-name">${c.name}</div>
-                <div class="creature-depth-tag">${c.depth.toLocaleString()} meters (${(c.depth * 3.28084).toFixed(0).toLocaleString()} ft)</div>
+                <div class="creature-depth-tag">${c.depth.toLocaleString()} m &nbsp;/&nbsp; ${Math.round(c.depth * 3.28084).toLocaleString()} ft</div>
                 <div class="creature-desc">${c.desc}</div>
             `;
-            card.onclick = () => openModal(c);
+            card.addEventListener('click', () => openModal(c));
             oceanColumn.appendChild(card);
         });
 
-        // Scroll calculations
+        // IntersectionObserver — fade+slide cards in
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    observer.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.creature-card').forEach(c => observer.observe(c));
+
+        // Scroll handler
+        const zoneColors = {
+            Sunlit:   { accent: '#38bdf8', bg: 'linear-gradient(180deg, #38bdf8 0%, #0284c7 100%)', name: 'Sunlit Zone' },
+            Twilight: { accent: '#818cf8', bg: 'linear-gradient(180deg, #0284c7 0%, #1e1b4b 100%)', name: 'Twilight Zone' },
+            Midnight: { accent: '#c084fc', bg: 'linear-gradient(180deg, #1e1b4b 0%, #090d16 100%)', name: 'Midnight Zone' },
+            Abyss:    { accent: '#f43f5e', bg: 'linear-gradient(180deg, #090d16 0%, #030712 100%)', name: 'The Abyss' },
+            Trenches: { accent: '#22c55e', bg: 'radial-gradient(circle at center, #0a0f1d 0%, #000000 100%)', name: 'The Trenches' },
+        };
+
+        function getZoneKey(depth) {
+            if (depth < 200)  return 'Sunlit';
+            if (depth < 1000) return 'Twilight';
+            if (depth < 4000) return 'Midnight';
+            if (depth < 6000) return 'Abyss';
+            return 'Trenches';
+        }
+
         window.addEventListener('scroll', () => {
             const scrollTop = window.scrollY;
             const maxScroll = document.body.scrollHeight - window.innerHeight;
-            const progress = Math.min(1, Math.max(0, scrollTop / maxScroll));
+            const progress  = Math.min(1, Math.max(0, scrollTop / maxScroll));
+            const depth     = Math.round(progress * OCEAN_MAX);
 
-            const currentDepth = Math.round(progress * oceanDepthMax);
-            hudDepth.textContent = `${currentDepth.toLocaleString()} meters`;
+            hudDepth.textContent = depth.toLocaleString() + ' m';
+            gaugeFill.style.height = (progress * 100) + '%';
 
-            // Color shift logic based on depth progress
-            let bg;
-            let zoneStr;
-            let colorAccent;
+            const zoneKey = getZoneKey(depth);
+            const zone    = zoneColors[zoneKey];
 
-            if (currentDepth < 200) {
-                zoneStr = "Sunlit Zone";
-                colorAccent = "#38bdf8";
-                bg = `linear-gradient(180deg, #38bdf8 0%, #0284c7 100%)`;
-            } else if (currentDepth < 1000) {
-                zoneStr = "Twilight Zone";
-                colorAccent = "#818cf8";
-                bg = `linear-gradient(180deg, #0284c7 0%, #1e1b4b 100%)`;
-            } else if (currentDepth < 4000) {
-                zoneStr = "Midnight Zone";
-                colorAccent = "#c084fc";
-                bg = `linear-gradient(180deg, #1e1b4b 0%, #090d16 100%)`;
-            } else if (currentDepth < 6000) {
-                zoneStr = "The Abyss";
-                colorAccent = "#f43f5e";
-                bg = `linear-gradient(180deg, #090d16 0%, #030712 100%)`;
-            } else {
-                zoneStr = "The Trenches (Hadal)";
-                colorAccent = "#22c55e";
-                bg = `radial-gradient(circle at center, #0a0f1d 0%, #000000 100%)`;
-            }
+            depthBg.style.background = zone.bg;
+            hudZone.textContent       = zone.name;
+            gaugeFill.style.boxShadow = `0 0 6px ${zone.accent}`;
+            gaugeFill.style.background = zone.accent;
+            document.documentElement.style.setProperty('--depth-color', zone.accent);
+        }, { passive: true });
 
-            depthBg.style.background = bg;
-            hudZone.textContent = zoneStr;
-            document.documentElement.style.setProperty('--depth-color', colorAccent);
-        });
-
+        // Modal
         function openModal(c) {
-            document.getElementById('m-icon').textContent = c.icon;
-            document.getElementById('m-name').textContent = c.name;
+            document.getElementById('m-glyph').textContent = c.code;
+            document.getElementById('m-name').textContent  = c.name;
             document.getElementById('m-depth').textContent = `${c.depth.toLocaleString()} meters depth`;
-            document.getElementById('m-desc').textContent = c.desc;
+            document.getElementById('m-desc').textContent  = c.desc;
             document.getElementById('modal-overlay').classList.add('active');
         }
 
         function closeModal() {
             document.getElementById('modal-overlay').classList.remove('active');
         }
+
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        document.getElementById('modal-overlay').addEventListener('click', e => {
+            if (e.target === document.getElementById('modal-overlay')) closeModal();
+        });
     </script>
 </body>
 </html>
