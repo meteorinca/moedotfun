@@ -1,56 +1,34 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moe's Playground | moedotfun</title>
-    <meta name="description" content="Minimalist curiosity-driven web experiments, simulations, and apps.">
+    <title>moe.fun - games and stuff by Moe</title>
+    <meta name="description" content="A collection of games, simulations, and interactive web experiments by Moe.">
+    <link rel="icon" href="assets/logo.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header class="app-header">
-        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <a href="index.html" class="app-brand">
-                <span class="app-logo">m</span>
-                <span class="app-title">moedotfun</span>
-            </a>
+    <div class="site-wrapper">
+        <header class="site-header">
+            <h1 class="brand-title">
+                <a href="index.html">
+                    <span class="brand-text">MOE</span>
+                    <span class="brand-dot">·</span>
+                    <span class="brand-fun">FUN</span>
+                </a>
+            </h1>
+            <p class="brand-subtitle">games and stuff by Moe</p>
+        </header>
 
-            <nav class="app-nav" id="app-nav">
-                <span class="app-nav-item active" data-category="All">all</span>
-                <span class="app-nav-sep">|</span>
-                <span class="app-nav-item" data-category="Simulation">simulations</span>
-                <span class="app-nav-sep">|</span>
-                <span class="app-nav-item" data-category="Interactive">interactive</span>
-                <span class="app-nav-sep">|</span>
-                <span class="app-nav-item" data-category="Creative">creative</span>
-                <span class="app-nav-sep">|</span>
-                <span class="app-nav-item" data-category="Educational">educational</span>
-                <span class="app-nav-sep">|</span>
-                <span class="app-nav-item" data-category="Games">games</span>
-            </nav>
-        </div>
+        <main class="grid-container" id="cards-grid">
+            <!-- Cards populated dynamically by script.js -->
+        </main>
 
-        <div class="app-actions">
-            <button class="btn-toggle" id="btn-layout">View: List</button>
-            <button class="btn-toggle" id="btn-theme">Dark Mode</button>
-        </div>
-    </header>
-
-    <main class="app-container">
-        <div class="search-box">
-            <input type="text" class="search-input" id="search-input" placeholder="Search demos & experiments..." />
-            <span style="font-size: 11px; color: var(--text-muted);" id="item-count-label">14 items</span>
-        </div>
-
-        <div id="content-area" class="app-list">
-        </div>
-    </main>
-
-    <footer>
-        <p>
-            <a href="index.html">moedotfun</a> | Built by Moe
-        </p>
-    </footer>
+        <footer class="site-footer">
+            <p><a href="index.html">moe.fun</a> · Made by Moe</p>
+        </footer>
+    </div>
 
     <script src="script.js"></script>
 </body>

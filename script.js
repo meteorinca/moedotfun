@@ -1,158 +1,185 @@
+const DEFAULT_PROJECTS = [
+  {
+    "title": "Coin Flip",
+    "description": "Matrix entropy coin flip harvesting mouse coordinates, crypto CSPRNG, & bitwise mixing.",
+    "link": "demos/coinflip/index.html",
+    "category": "Interactive",
+    "badge": "NEW"
+  },
+  {
+    "title": "Spend Tech Billions",
+    "description": "Have $200 Billion? Spend it on rockets, islands, Mona Lisa, & gaming studios.",
+    "link": "demos/spend-billions/index.html",
+    "image": "assets/spend_billions.png",
+    "category": "Simulation",
+    "badge": "NEW"
+  },
+  {
+    "title": "The Deep Sea Explorer",
+    "description": "Scroll down 11,000 meters to discover deep ocean creatures & mysteries.",
+    "link": "demos/deep-sea/index.html",
+    "image": "assets/deep_sea.png",
+    "category": "Interactive",
+    "badge": "NEW"
+  },
+  {
+    "title": "Time & Cosmic Progress",
+    "description": "Live real-time percentage progress of minute, day, year, life, & cosmic scales.",
+    "link": "demos/time-progress/index.html",
+    "image": "assets/time_progress.png",
+    "category": "Simulation",
+    "badge": "NEW"
+  },
+  {
+    "title": "Design the Next Robot",
+    "description": "Customize sci-fi AI bots with weapons, expressions, thrusters, & specs generator.",
+    "link": "demos/design-robot/index.html",
+    "image": "assets/design_robot.png",
+    "category": "Creative",
+    "badge": "NEW"
+  },
+  {
+    "title": "Life Milestones Checklist",
+    "description": "Interactive checklist of life's iconic moments with rank badges & unlocks.",
+    "link": "demos/life-checklist/index.html",
+    "image": "assets/life_checklist.png",
+    "category": "Interactive",
+    "badge": "NEW"
+  },
+  {
+    "title": "Art With Math",
+    "description": "Mind-bending generative mathematical art, fractals, and geometric demos.",
+    "link": "https://meteorinca.github.io/ArtWithMath/",
+    "image": "assets/artwithmath.png",
+    "category": "Creative",
+    "badge": "FEATURED"
+  },
+  {
+    "title": "Logic Gates Simulator",
+    "description": "Interactive digital circuit and logic gate simulator for tech explorers.",
+    "link": "https://meteorinca.github.io/Logic-Gates-Simulator/",
+    "image": "assets/logic_gates.png",
+    "category": "Educational",
+    "badge": "FEATURED"
+  },
+  {
+    "title": "Understanding Entropy",
+    "description": "An intuitive visual breakdown of thermodynamics, chaos, and information theory.",
+    "link": "https://meteorinca.github.io/entropy/",
+    "image": "assets/entropy.png",
+    "category": "Educational",
+    "badge": "FEATURED"
+  },
+  {
+    "title": "Cyber Fountain",
+    "description": "A hilarious web experiment that releases endless streams of autonomous bots.",
+    "link": "https://meteorinca.github.io/cfountain/",
+    "image": "assets/cfountain.png",
+    "category": "Interactive",
+    "badge": "FUN"
+  },
+  {
+    "title": "Soviet Workout Regiment",
+    "description": "Easy-to-follow minimalist workout routines for peak physical discipline.",
+    "link": "https://meteorinca.github.io/sovietworkout/",
+    "image": "assets/sovietworkout.png",
+    "category": "Interactive",
+    "badge": "FEATURED"
+  },
+  {
+    "title": "Urdu Type Studio",
+    "description": "Seamless online typing environment in authentic Urdu font.",
+    "link": "https://meteorinca.github.io/urdu/",
+    "image": "assets/urdu.png",
+    "category": "Interactive",
+    "badge": "FEATURED"
+  },
+  {
+    "title": "FishGame",
+    "description": "Very Basic Game for lil Nephew.",
+    "link": "https://meteorinca.github.io/fishgame/",
+    "image": "assets/fishgame.jpg",
+    "category": "Games"
+  },
+  {
+    "title": "MathRacing",
+    "description": "Speed-solve math equations to win the race.",
+    "link": "https://meteorinca.github.io/MathRacingTutorFS/",
+    "image": "assets/mathracing.jpg",
+    "category": "Games"
+  },
+  {
+    "title": "UnstableStack",
+    "description": "Physics-based tower building challenge.",
+    "link": "https://meteorinca.github.io/p5stack-demo/",
+    "image": "assets/stack.jpg",
+    "category": "Games"
+  }
+];
+
 document.addEventListener('DOMContentLoaded', () => {
-    const contentArea = document.getElementById('content-area');
-    const navItems = document.querySelectorAll('.app-nav-item');
-    const searchInput = document.getElementById('search-input');
-    const itemCountLabel = document.getElementById('item-count-label');
-    const btnLayout = document.getElementById('btn-layout');
-    const btnTheme = document.getElementById('btn-theme');
+    const gridContainer = document.getElementById('cards-grid');
 
-    let allProjects = [];
-    let currentCategory = 'All';
-    let currentLayout = 'list'; // 'list' or 'grid'
-    let currentTheme = localStorage.getItem('moe_theme') || 'light';
+    // First render immediately with default data for instant display & file:// compatibility
+    renderGrid(DEFAULT_PROJECTS);
 
-    // Apply theme
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    btnTheme.textContent = currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
-
-    // Helper to extract clean domain string
-    function extractDomain(url) {
-        if (!url) return 'moedotfun';
-        if (url.startsWith('demos/')) return 'moe.fun';
-        try {
-            const parsed = new URL(url);
-            return parsed.hostname.replace('www.', '');
-        } catch {
-            return 'moe.fun';
-        }
+    // Try fetching projects.json dynamically if hosted on a web server
+    if (window.location.protocol.startsWith('http')) {
+        fetch('projects.json')
+            .then(res => {
+                if (!res.ok) throw new Error('Network error');
+                return res.json();
+            })
+            .then(projects => {
+                if (Array.isArray(projects) && projects.length > 0) {
+                    renderGrid(projects);
+                }
+            })
+            .catch(err => {
+                console.warn('Using local dataset (fetch warning):', err);
+            });
     }
 
-    fetch('projects.json')
-        .then(res => res.json())
-        .then(data => {
-            allProjects = data.map((p, index) => ({
-                ...p,
-                points: p.points || Math.floor(Math.random() * 150) + 42,
-                comments: p.comments || Math.floor(Math.random() * 30) + 5,
-                index: index + 1
-            }));
-            render();
-        })
-        .catch(err => console.error('Error loading projects:', err));
+    function renderGrid(projects) {
+        gridContainer.innerHTML = projects.map(p => {
+            const isExternal = p.link && p.link.startsWith('http');
+            const targetAttr = isExternal ? 'target="_blank" rel="noopener noreferrer"' : '';
+            const ariaLabel = `${p.title}: ${p.description || ''}`;
 
-    function render() {
-        const query = searchInput.value.toLowerCase().trim();
-        let filtered = allProjects;
-
-        if (currentCategory !== 'All') {
-            filtered = filtered.filter(p => p.category === currentCategory);
-        }
-
-        if (query) {
-            filtered = filtered.filter(p => 
-                p.title.toLowerCase().includes(query) || 
-                p.description.toLowerCase().includes(query) ||
-                (p.category && p.category.toLowerCase().includes(query))
-            );
-        }
-
-        itemCountLabel.textContent = `${filtered.length} item${filtered.length === 1 ? '' : 's'}`;
-
-        if (currentLayout === 'list') {
-            renderListView(filtered);
-        } else {
-            renderGridView(filtered);
-        }
-    }
-
-    function renderListView(projects) {
-        contentArea.className = 'app-list';
-        if (projects.length === 0) {
-            contentArea.innerHTML = `<div style="padding: 20px 0; color: var(--text-muted);">No experiments match your filter.</div>`;
-            return;
-        }
-
-        contentArea.innerHTML = projects.map((p, i) => {
-            const domain = extractDomain(p.link);
-            const badgeHTML = p.badge ? `<span class="badge-tag">${p.badge}</span>` : '';
-
-            return `
-                <div class="app-item">
-                    <span class="app-rank">${i + 1}.</span>
-                    <span class="app-vote" title="upvote">▲</span>
-                    <div class="app-details">
-                        <div class="app-item-title-row">
-                            <a class="app-item-title" href="${p.link}" ${p.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>${p.title}</a>
-                            <span class="app-item-domain">(${domain})</span>
-                            ${badgeHTML}
+            if (p.image) {
+                return `
+                    <a class="card-banner" href="${p.link}" ${targetAttr} aria-label="${ariaLabel}">
+                        <img class="card-image" src="${p.image}" alt="${escapeHTML(p.title)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="card-fallback" style="display: none;">
+                            <div class="card-fallback-inner">
+                                <div class="card-fallback-title">${escapeHTML(p.title)}</div>
+                                <div class="card-fallback-desc">${escapeHTML(p.description || '')}</div>
+                            </div>
                         </div>
-                        <div class="app-item-meta">
-                            <span>${p.points} points</span>
-                            <span>|</span>
-                            <span class="tag-pill">${p.category || 'experiment'}</span>
-                            <span>|</span>
-                            <span>${p.description}</span>
+                    </a>
+                `;
+            } else {
+                return `
+                    <a class="card-banner" href="${p.link}" ${targetAttr} aria-label="${ariaLabel}">
+                        <div class="card-fallback">
+                            <div class="card-fallback-inner">
+                                <div class="card-fallback-title">${escapeHTML(p.title)}</div>
+                                <div class="card-fallback-desc">${escapeHTML(p.description || '')}</div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            `;
+                    </a>
+                `;
+            }
         }).join('');
     }
 
-    function renderGridView(projects) {
-        contentArea.className = 'app-grid-mode';
-        if (projects.length === 0) {
-            contentArea.innerHTML = `<div style="padding: 20px 0; color: var(--text-muted);">No experiments match your filter.</div>`;
-            return;
-        }
-
-        contentArea.innerHTML = projects.map(p => {
-            const domain = extractDomain(p.link);
-            const badgeHTML = p.badge ? `<span class="badge-tag">${p.badge}</span>` : '';
-
-            return `
-                <div class="app-card">
-                    <div>
-                        <div class="app-card-top">
-                            <a class="app-card-title" href="${p.link}" ${p.link.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>${p.title}</a>
-                            ${badgeHTML}
-                        </div>
-                        <div class="app-card-desc">${p.description}</div>
-                    </div>
-                    <div class="app-card-footer">
-                        <span class="tag-pill">${p.category || 'experiment'}</span>
-                        <span>${domain}</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
+    function escapeHTML(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
-
-    // Category navigation filter
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            navItems.forEach(n => n.classList.remove('active'));
-            item.classList.add('active');
-            currentCategory = item.dataset.category;
-            render();
-        });
-    });
-
-    // Search input live filtering
-    searchInput.addEventListener('input', render);
-
-    // Layout switcher button (List vs Cards)
-    btnLayout.addEventListener('click', () => {
-        currentLayout = currentLayout === 'list' ? 'grid' : 'list';
-        btnLayout.textContent = currentLayout === 'list' ? 'View: Grid' : 'View: List';
-        render();
-    });
-
-    // Dark/Light theme button
-    btnTheme.addEventListener('click', () => {
-        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        localStorage.setItem('moe_theme', currentTheme);
-        btnTheme.textContent = currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
-    });
 });
