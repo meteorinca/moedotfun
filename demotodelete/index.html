@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropy Coin Flip</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            background: #000;
+            border: 1px solid #0f0;
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 24px;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.25;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0f0;
+            text-shadow: 0 0 8px #0f0;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .coin-scene {
+            width: 120px;
+            height: 120px;
+            perspective: 600px;
+            margin: 16px 0;
+        }
+
+        .coin {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .coin-face {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            border: 3px solid #0f0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            background: #001100;
+            color: #0f0;
+        }
+
+        .coin-back {
+            transform: rotateY(180deg);
+        }
+
+        .terminal {
+            width: 100%;
+            background: rgba(0, 20, 0, 0.85);
+            border: 1px solid #0f0;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.6;
+            min-height: 180px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .line {
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .line.source {
+            color: #0f0;
+        }
+
+        .line.op {
+            color: #0ff;
+        }
+
+        .line.destruct {
+            color: #ff0;
+        }
+
+        .line.result {
+            color: #f0f;
+            font-weight: bold;
+        }
+
+        .line.final {
+            color: #fff;
+            font-size: 16px;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        button {
+            background: transparent;
+            color: #0f0;
+            border: 2px solid #0f0;
+            padding: 12px 32px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 20px #0f0;
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .stats {
+            display: flex;
+            gap: 24px;
+            font-size: 12px;
+            color: #0a0;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-val {
+            font-size: 18px;
+            color: #0f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="root">
+        <canvas id="matrixCanvas"></canvas>
+        <div class="content">
+            <h1>ENTROPY COIN FLIP</h1>
+
+            <div class="coin-scene">
+                <div class="coin" id="coin">
+                    <div class="coin-face">H</div>
+                    <div class="coin-face coin-back">T</div>
+                </div>
+            </div>
+
+            <div class="terminal" id="terminal"></div>
+
+            <button id="flipBtn" onclick="startFlip()">Initiate Flip</button>
+
+            <div class="stats">
+                <div class="stat"><span>Heads</span><span class="stat-val" id="headsCount">0</span></div>
+                <div class="stat"><span>Tails</span><span class="stat-val" id="tailsCount">0</span></div>
+                <div class="stat"><span>Flips</span><span class="stat-val" id="flipCount">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+            const terminal = document.getElementById('terminal');
+            const coin = document.getElementById('coin');
+            const flipBtn = document.getElementById('flipBtn');
+            const headsCount = document.getElementById('headsCount');
+            const tailsCount = document.getElementById('tailsCount');
+            const flipCount = document.getElementById('flipCount');
+
+            const headsAudio = new Audio('heads.mp3');
+            const tailsAudio = new Audio('tails.mp3');
+
+            let stats = { heads: 0, tails: 0, total: 0 };
+            let isFlipping = false;
+            let mouseX = 0, mouseY = 0;
+
+            function resizeCanvas() {
+                const rect = document.getElementById('root').getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+            const fontSize = 14;
+            let columns = Math.floor(canvas.width / fontSize);
+            let drops = Array(columns).fill(1);
+
+            window.addEventListener('resize', () => { resizeCanvas(); initMatrix(); });
+            function initMatrix() {
+                columns = Math.floor(canvas.width / fontSize);
+                drops = Array(columns).fill(1);
+            }
+
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#0f0';
+                ctx.font = fontSize + 'px monospace';
+                for (let i = 0; i < drops.length; i++) {
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+            }
+            setInterval(drawMatrix, 50);
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            function log(text, cls = 'source', delay = 0) {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        const div = document.createElement('div');
+                        div.className = 'line ' + cls;
+                        div.textContent = text;
+                        terminal.appendChild(div);
+                        terminal.scrollTop = terminal.scrollHeight;
+                        resolve();
+                    }, delay);
+                });
+            }
+
+            function clearTerminal() { terminal.innerHTML = ''; }
+
+            function djb2(str) {
+                let hash = 5381;
+                for (let i = 0; i < str.length; i++) {
+                    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+                    hash = hash & 0xFFFFFFFF;
+                }
+                return hash >>> 0;
+            }
+
+            function rotl(n, b) {
+                return ((n << b) | (n >>> (32 - b))) >>> 0;
+            }
+
+            function toHex(n) {
+                return '0x' + (n >>> 0).toString(16).padStart(8, '0');
+            }
+
+            async function startFlip() {
+                if (isFlipping) return;
+                isFlipping = true;
+                flipBtn.disabled = true;
+                clearTerminal();
+
+                const s1 = Math.random();
+                const s2 = Date.now();
+                const s3 = performance.now();
+                const s4 = mouseX || Math.random() * 1920;
+                const s5 = mouseY || Math.random() * 1080;
+                const s6 = (window.screen.width * window.screen.height) + (window.devicePixelRatio * 1000);
+                const s7 = (() => {
+                    try {
+                        const arr = new Uint32Array(1);
+                        crypto.getRandomValues(arr);
+                        return arr[0];
+                    } catch (e) { return Math.floor(Math.random() * 4294967296); }
+                })();
+
+                await log('>>> ENTROPY HARVESTING INITIATED <<<', 'source', 100);
+                await log(`SRC[1] Math.random()      = ${s1.toFixed(16)}`, 'source', 200);
+                await log(`SRC[2] Date.now()          = ${s2}`, 'source', 200);
+                await log(`SRC[3] performance.now()   = ${s3.toFixed(6)}`, 'source', 200);
+                await log(`SRC[4] Mouse X coordinate  = ${s4.toFixed(2)}`, 'source', 200);
+                await log(`SRC[5] Mouse Y coordinate  = ${s5.toFixed(2)}`, 'source', 200);
+                await log(`SRC[6] Screen fingerprint  = ${s6}`, 'source', 200);
+                await log(`SRC[7] crypto.getRandom()  = ${s7} (${toHex(s7)})`, 'source', 200);
+
+                await log('', 'source', 300);
+                await log('>>> DESTRUCTIVE MIXING <<<', 'destruct', 300);
+
+                const step1 = (s1 * s2 * s3 * s4 * s5 * s6 * s7);
+                await log(`MUL(ALL) = ${step1.toExponential(6)}`, 'op', 250);
+
+                const step2 = step1 % 4294967296;
+                await log(`MOD(2^32) = ${toHex(step2)}`, 'op', 250);
+
+                const step3 = (step2 ^ s2) >>> 0;
+                await log(`XOR(Date) = ${toHex(step3)}`, 'op', 250);
+
+                const step4 = rotl(step3, 17);
+                await log(`ROTL(17)  = ${toHex(step4)}`, 'op', 250);
+
+                const step5 = djb2(toHex(step4));
+                await log(`DJB2(hex) = ${toHex(step5)}`, 'op', 250);
+
+                const step6 = (((step5 ^ s7) ^ (s6 >>> 0)) ^ (s3 >>> 0)) >>> 0;
+                await log(`XOR_CASCADE = ${toHex(step6)}`, 'op', 250);
+
+                const final = step6 % 2;
+                await log(`MOD(2)    = ${final}`, 'result', 400);
+                await log('', 'source', 200);
+
+                const result = final === 0 ? 'heads' : 'tails';
+                const rotations = 5 + Math.floor(Math.random() * 5);
+                let angle = 0;
+                let speed = 30;
+                const decel = 0.985;
+
+                function animateCoin() {
+                    angle += speed;
+                    speed *= decel;
+                    coin.style.transform = `rotateY(${angle}deg)`;
+                    if (speed > 0.5) {
+                        requestAnimationFrame(animateCoin);
+                    } else {
+                        coin.style.transform = `rotateY(${result === 'heads' ? 0 : 180}deg)`;
+                        finishFlip(result);
+                    }
+                }
+                animateCoin();
+            }
+
+            function playAudio(result) {
+                const audio = result === 'heads' ? headsAudio : tailsAudio;
+                audio.currentTime = 0;
+                audio.play().catch(err => console.warn('Audio playback failed or was blocked:', err));
+            }
+
+            async function finishFlip(result) {
+                playAudio(result);
+                await log(`>>> RESULT: ${result.toUpperCase()} <<<`, 'final', 300);
+                stats.total++;
+                if (result === 'heads') stats.heads++;
+                else stats.tails++;
+                headsCount.textContent = stats.heads;
+                tailsCount.textContent = stats.tails;
+                flipCount.textContent = stats.total;
+                isFlipping = false;
+                flipBtn.disabled = false;
+            }
+
+            window.startFlip = startFlip;
+        })();
+    </script>
+
+</body>
+
+</html>

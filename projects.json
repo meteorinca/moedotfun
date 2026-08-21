@@ -1,5 +1,12 @@
 [
   {
+    "title": "Coin Flip",
+    "description": "Matrix entropy coin flip harvesting mouse coordinates, crypto CSPRNG, & bitwise mixing.",
+    "link": "demos/coinflip/index.html",
+    "category": "Interactive",
+    "badge": "NEW"
+  },
+  {
     "title": "Spend Tech Billions",
     "description": "Have $200 Billion? Spend it on rockets, islands, Mona Lisa, & gaming studios.",
     "link": "demos/spend-billions/index.html",
