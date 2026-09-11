@@ -2,7 +2,7 @@
   {
     "title": "Coin Flip",
     "description": "Matrix entropy coin flip harvesting mouse coordinates, crypto CSPRNG, & bitwise mixing.",
-    "link": "demos/coinflip/index.html",
+    "link": "demos/coinflip/",
     "category": "Interactive",
     "badge": "NEW"
   },
@@ -10,7 +10,6 @@
     "title": "Spend Tech Billions",
     "description": "Have $200 Billion? Spend it on rockets, islands, Mona Lisa, & gaming studios.",
     "link": "demos/spend-billions/index.html",
-    "image": "assets/spend_billions.png",
     "category": "Simulation",
     "badge": "NEW"
   },
@@ -18,7 +17,6 @@
     "title": "The Deep Sea Explorer",
     "description": "Scroll down 11,000 meters to discover deep ocean creatures & mysteries.",
     "link": "demos/deep-sea/index.html",
-    "image": "assets/deep_sea.png",
     "category": "Interactive",
     "badge": "NEW"
   },
@@ -26,7 +24,6 @@
     "title": "Time & Cosmic Progress",
     "description": "Live real-time percentage progress of minute, day, year, life, & cosmic scales.",
     "link": "demos/time-progress/index.html",
-    "image": "assets/time_progress.png",
     "category": "Simulation",
     "badge": "NEW"
   },
@@ -34,7 +31,6 @@
     "title": "Design the Next Robot",
     "description": "Customize sci-fi AI bots with weapons, expressions, thrusters, & specs generator.",
     "link": "demos/design-robot/index.html",
-    "image": "assets/design_robot.png",
     "category": "Creative",
     "badge": "NEW"
   },
@@ -42,7 +38,6 @@
     "title": "Life Milestones Checklist",
     "description": "Interactive checklist of life's iconic moments with rank badges & unlocks.",
     "link": "demos/life-checklist/index.html",
-    "image": "assets/life_checklist.png",
     "category": "Interactive",
     "badge": "NEW"
   },
@@ -50,7 +45,6 @@
     "title": "Art With Math",
     "description": "Mind-bending generative mathematical art, fractals, and geometric demos.",
     "link": "https://meteorinca.github.io/ArtWithMath/",
-    "image": "assets/artwithmath.png",
     "category": "Creative",
     "badge": "FEATURED"
   },
@@ -58,7 +52,6 @@
     "title": "Logic Gates Simulator",
     "description": "Interactive digital circuit and logic gate simulator for tech explorers.",
     "link": "https://meteorinca.github.io/Logic-Gates-Simulator/",
-    "image": "assets/logic_gates.png",
     "category": "Educational",
     "badge": "FEATURED"
   },
@@ -66,7 +59,6 @@
     "title": "Understanding Entropy",
     "description": "An intuitive visual breakdown of thermodynamics, chaos, and information theory.",
     "link": "https://meteorinca.github.io/entropy/",
-    "image": "assets/entropy.png",
     "category": "Educational",
     "badge": "FEATURED"
   },
@@ -74,7 +66,6 @@
     "title": "Cyber Fountain",
     "description": "A hilarious web experiment that releases endless streams of autonomous bots.",
     "link": "https://meteorinca.github.io/cfountain/",
-    "image": "assets/cfountain.png",
     "category": "Interactive",
     "badge": "FUN"
   },
@@ -82,7 +73,6 @@
     "title": "Soviet Workout Regiment",
     "description": "Easy-to-follow minimalist workout routines for peak physical discipline.",
     "link": "https://meteorinca.github.io/sovietworkout/",
-    "image": "assets/sovietworkout.png",
     "category": "Interactive",
     "badge": "FEATURED"
   },
@@ -90,7 +80,6 @@
     "title": "Urdu Type Studio",
     "description": "Seamless online typing environment in authentic Urdu font.",
     "link": "https://meteorinca.github.io/urdu/",
-    "image": "assets/urdu.png",
     "category": "Interactive",
     "badge": "FEATURED"
   },
@@ -98,21 +87,18 @@
     "title": "FishGame",
     "description": "Very Basic Game for lil Nephew.",
     "link": "https://meteorinca.github.io/fishgame/",
-    "image": "assets/fishgame.jpg",
     "category": "Games"
   },
   {
     "title": "MathRacing",
     "description": "Speed-solve math equations to win the race.",
     "link": "https://meteorinca.github.io/MathRacingTutorFS/",
-    "image": "assets/mathracing.jpg",
     "category": "Games"
   },
   {
     "title": "UnstableStack",
     "description": "Physics-based tower building challenge.",
     "link": "https://meteorinca.github.io/p5stack-demo/",
-    "image": "assets/stack.jpg",
     "category": "Games"
   }
 ]
