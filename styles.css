@@ -84,6 +84,11 @@ body {
 .card-banner:hover {
     transform: translateY(-4px) scale(1.02);
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    background-color: #111111;
+}
+
+.card-banner:hover .card-minimal {
+    color: #ffffff;
 }
 
 .card-banner:active {
@@ -95,53 +100,43 @@ body {
     outline-offset: 3px;
 }
 
-.card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-/* Fallback Card Banner (when user hasn't added a PNG yet) */
-.card-fallback {
+/* Minimalist SVG + Text Card */
+.card-minimal {
     width: 100%;
     height: 100%;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 16px;
-    background: #ffffff;
-    text-align: center;
+    gap: 12px;
+    padding: 16px 20px;
+    color: #111111;
+    transition: color 0.16s ease;
 }
 
-.card-fallback-inner {
-    display: flex;
-    flex-direction: column;
+.card-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1.5px solid #111111;
-    border-radius: 8px;
-    width: 90%;
-    height: 80%;
-    padding: 8px 12px;
 }
 
-.card-fallback-title {
+.card-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.card-title {
     font-size: 22px;
     font-weight: 800;
-    color: #111111;
-    letter-spacing: -0.3px;
-}
-
-.card-fallback-desc {
-    font-size: 11px;
-    color: #666666;
-    margin-top: 4px;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    letter-spacing: -0.4px;
+    line-height: 1.1;
 }
 
 /* Footer */

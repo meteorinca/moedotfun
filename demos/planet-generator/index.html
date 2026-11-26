@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planets | moe.fun</title>
+    <link rel="icon" href="../../assets/logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper: #f3ede0;
+            --paper-alt: #e9e1d0;
+            --ink: #16181a;
+            --ink-muted: #646158;
+            --rule: #cbc2b0;
+            --void: #0d1115;
+            --vermilion: #c24b28;
+            --brass: #a88234;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--paper);
+            color: var(--ink);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: var(--paper);
+            border-bottom: 1.5px solid var(--ink);
+            padding: 0.65rem 1.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: baseline;
+            gap: 1.25rem;
+        }
+
+        .back-link {
+            color: var(--ink-muted);
+            text-decoration: none;
+            font-size: 0.76rem;
+            border-bottom: 1px solid transparent;
+        }
+        .back-link:hover { color: var(--ink); border-color: var(--ink); }
+
+        .header-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.75rem;
+            font-weight: 400;
+            line-height: 1;
+            letter-spacing: -0.01em;
+        }
+        .atlas-tag {
+            font-size: 0.66rem;
+            color: var(--ink-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .atlas-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.42rem 0.78rem;
+            border: 1.5px solid var(--ink);
+            background: var(--paper);
+            color: var(--ink);
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+        }
+        .atlas-btn:hover { background: var(--ink); color: var(--paper); }
+        .atlas-btn.accent {
+            background: var(--vermilion);
+            border-color: var(--vermilion);
+            color: #fff9f2;
+        }
+        .atlas-btn.accent:hover { background: #a73d1e; border-color: #a73d1e; }
+
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 330px;
+            min-height: 0;
+        }
+
+        /* Matte Observatory Viewport */
+        .viewport {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--void);
+        }
+
+        #gl-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: grab;
+            touch-action: none;
+        }
+        #gl-canvas:active { cursor: grabbing; }
+
+        /* Brass Corner Registration Marks */
+        .reticle-corner {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-color: rgba(243, 237, 224, 0.35);
+            border-style: solid;
+            pointer-events: none;
+        }
+        .rc-tl { top: 14px; left: 14px; border-width: 1.5px 0 0 1.5px; }
+        .rc-tr { top: 14px; right: 14px; border-width: 1.5px 1.5px 0 0; }
+        .rc-bl { bottom: 14px; left: 14px; border-width: 0 0 1.5px 1.5px; }
+        .rc-br { bottom: 14px; right: 14px; border-width: 0 1.5px 1.5px 0; }
+
+        .plate-caption {
+            position: absolute;
+            bottom: 16px;
+            left: 24px;
+            color: rgba(243, 237, 224, 0.58);
+            font-size: 0.68rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
+        /* Printed Parchment Dossier Sidebar */
+        .sidebar {
+            background: var(--paper);
+            border-left: 1.5px solid var(--ink);
+            padding: 1.1rem 1.2rem 1.4rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+        }
+
+        .dossier-head {
+            border-bottom: 1.5px solid var(--ink);
+            padding-bottom: 0.75rem;
+        }
+        .planet-name {
+            font-family: 'Instrument Serif', serif;
+            font-size: 2rem;
+            line-height: 1;
+            font-weight: 400;
+        }
+        .planet-class {
+            font-size: 0.68rem;
+            color: var(--vermilion);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 4px;
+            font-weight: 700;
+        }
+
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem 0.75rem;
+            margin-top: 0.75rem;
+            padding-top: 0.65rem;
+            border-top: 1px solid var(--rule);
+            font-size: 0.65rem;
+            color: var(--ink-muted);
+        }
+        .telemetry-grid strong {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--ink);
+            margin-top: 1px;
+        }
+
+        .section-label {
+            font-size: 0.66rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--ink-muted);
+            margin-bottom: 0.45rem;
+        }
+
+        .biome-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.35rem;
+        }
+        .biome-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.68rem;
+            padding: 0.42rem 0.25rem;
+            border: 1px solid #bdb3a1;
+            background: var(--paper-alt);
+            color: var(--ink);
+            cursor: pointer;
+            text-align: center;
+        }
+        .biome-btn:hover { border-color: var(--ink); }
+        .biome-btn.active {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: var(--paper);
+        }
+
+        .slider-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.72rem;
+        }
+        .slider-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.26rem;
+        }
+        .slider-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+        }
+        .slider-val { color: var(--ink-muted); }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 2px;
+            background: #bdb3a1;
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 10px;
+            height: 14px;
+            background: var(--ink);
+            cursor: pointer;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--rule);
+            padding-top: 0.75rem;
+            font-size: 0.72rem;
+        }
+
+        .check-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.28rem 0.65rem;
+            border: 1.5px solid var(--ink);
+            background: var(--ink);
+            color: var(--paper);
+            cursor: pointer;
+        }
+        .check-btn.off {
+            background: var(--paper);
+            color: var(--ink-muted);
+            border-color: #bdb3a1;
+        }
+
+        @media (max-width: 860px) {
+            body { height: auto; overflow: auto; }
+            .workspace { grid-template-columns: 1fr; }
+            .viewport { height: 56vh; min-height: 360px; }
+            .sidebar { border-left: none; border-top: 1.5px solid var(--ink); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <a href="../../index.html" class="back-link">← moe.fun</a>
+            <h1 class="header-title">Planets</h1>
+            <span class="atlas-tag">Observatory Plate · 3D</span>
+        </div>
+        <div class="header-actions">
+            <button class="atlas-btn accent" id="btn-randomize">New Body</button>
+            <button class="atlas-btn" id="btn-snapshot">Save Plate</button>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <div class="viewport">
+            <canvas id="gl-canvas"></canvas>
+            <div class="reticle-corner rc-tl"></div>
+            <div class="reticle-corner rc-tr"></div>
+            <div class="reticle-corner rc-bl"></div>
+            <div class="reticle-corner rc-br"></div>
+            <div class="plate-caption">Drag to orient · Scroll to magnify</div>
+        </div>
+
+        <aside class="sidebar">
+            <div class="dossier-head">
+                <div class="planet-name" id="planet-name">Aurelia Prime</div>
+                <div class="planet-class" id="planet-class">CLASS-M TERRAN</div>
+                <div class="telemetry-grid">
+                    <div>CATALOG<strong id="stat-seed">#4821</strong></div>
+                    <div>HABITABILITY<strong id="stat-hab">94%</strong></div>
+                    <div>SATELLITES<strong id="stat-moons">2</strong></div>
+                    <div>POPULATION<strong id="stat-pop">8.6B</strong></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-label">Classification</div>
+                <div class="biome-grid">
+                    <button class="biome-btn active" data-biome="0">Terran</button>
+                    <button class="biome-btn" data-biome="1">Arid</button>
+                    <button class="biome-btn" data-biome="2">Cryo</button>
+                    <button class="biome-btn" data-biome="3">Volcanic</button>
+                    <button class="biome-btn" data-biome="4">Exo-Bio</button>
+                    <button class="biome-btn" data-biome="5">Jovian</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-label">Telemetry Controls</div>
+                <div class="slider-list">
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Sea Level</span><span class="slider-val" id="val-sea">52%</span></div>
+                        <input type="range" id="sl-sea" min="0" max="100" value="52">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Atmosphere</span><span class="slider-val" id="val-atmo">65%</span></div>
+                        <input type="range" id="sl-atmo" min="0" max="100" value="65">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Cloud Deck</span><span class="slider-val" id="val-clouds">48%</span></div>
+                        <input type="range" id="sl-clouds" min="0" max="100" value="48">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Ring System</span><span class="slider-val" id="val-rings">45%</span></div>
+                        <input type="range" id="sl-rings" min="0" max="100" value="45">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Moons</span><span class="slider-val" id="val-moons">2</span></div>
+                        <input type="range" id="sl-moons" min="0" max="4" step="1" value="2">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Night Lights</span><span class="slider-val" id="val-lights">78%</span></div>
+                        <input type="range" id="sl-lights" min="0" max="100" value="78">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Solar Phase</span><span class="slider-val" id="val-sun">35°</span></div>
+                        <input type="range" id="sl-sun" min="-180" max="180" value="35">
+                    </div>
+                </div>
+            </div>
+
+            <div class="toggle-row">
+                <span>Axial Rotation</span>
+                <button class="check-btn" id="toggle-spin">ON</button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+    (() => {
+        const canvas = document.getElementById('gl-canvas');
+        const gl = canvas.getContext('webgl', { preserveDrawingBuffer: true, antialias: true });
+        if (!gl) {
+            document.querySelector('.viewport').innerHTML =
+                '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:#f3ede0;padding:2rem;">WebGL required.</div>';
+            return;
+        }
+
+        const VERT_SRC = `
+            attribute vec2 aPos;
+            void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+        `;
+
+        const FRAG_SRC = `
+            precision highp float;
+            uniform vec2 uRes;
+            uniform float uTime, uSeed, uYaw, uPitch, uZoom;
+            uniform float uSeaLevel, uAtmo, uClouds, uRings, uMoons, uLights, uSunAngle, uBiome;
+
+            float hash31(vec3 p) {
+                p = fract(p * 0.1031);
+                p += dot(p, p.yzx + 33.33);
+                return fract((p.x + p.y) * p.z);
+            }
+            float noise3(vec3 x) {
+                vec3 i = floor(x), f = fract(x);
+                f = f * f * (3.0 - 2.0 * f);
+                return mix(
+                    mix(mix(hash31(i+vec3(0,0,0)), hash31(i+vec3(1,0,0)), f.x),
+                        mix(hash31(i+vec3(0,1,0)), hash31(i+vec3(1,1,0)), f.x), f.y),
+                    mix(mix(hash31(i+vec3(0,0,1)), hash31(i+vec3(1,0,1)), f.x),
+                        mix(hash31(i+vec3(0,1,1)), hash31(i+vec3(1,1,1)), f.x), f.y), f.z);
+            }
+            float fbm(vec3 p) {
+                float v = 0.0, a = 0.5;
+                for (int i = 0; i < 6; i++) {
+                    v += a * noise3(p);
+                    p = p * 2.04 + vec3(13.7, 7.1, 19.3);
+                    a *= 0.5;
+                }
+                return v;
+            }
+            mat3 rotY(float a) { float c = cos(a), s = sin(a); return mat3(c,0.0,s, 0.0,1.0,0.0, -s,0.0,c); }
+            mat3 rotX(float a) { float c = cos(a), s = sin(a); return mat3(1.0,0.0,0.0, 0.0,c,-s, 0.0,s,c); }
+            vec2 intersectSphere(vec3 ro, vec3 rd, vec3 center, float r) {
+                vec3 oc = ro - center;
+                float b = dot(oc, rd), c = dot(oc, oc) - r * r, h = b * b - c;
+                if (h < 0.0) return vec2(-1.0);
+                h = sqrt(h);
+                return vec2(-b - h, -b + h);
+            }
+            vec3 getAtmoColor(float b) {
+                if (b < 0.5) return vec3(0.32, 0.62, 0.92);
+                if (b < 1.5) return vec3(0.88, 0.50, 0.30);
+                if (b < 2.5) return vec3(0.55, 0.84, 0.94);
+                if (b < 3.5) return vec3(0.92, 0.36, 0.16);
+                if (b < 4.5) return vec3(0.32, 0.72, 0.64);
+                return vec3(0.88, 0.72, 0.48);
+            }
+            vec3 getRingColor(float rNorm, float b) {
+                float bands = sin(rNorm * 42.0 + uSeed) * 0.5 + 0.5;
+                float fine = sin(rNorm * 140.0) * 0.5 + 0.5;
+                float gap = smoothstep(0.02, 0.06, abs(rNorm - 0.62));
+                vec3 baseA = vec3(0.84, 0.77, 0.66);
+                vec3 baseB = vec3(0.50, 0.45, 0.40);
+                if (b > 1.5 && b < 2.5) { baseA = vec3(0.76, 0.88, 0.94); baseB = vec3(0.42, 0.58, 0.68); }
+                return mix(baseB, baseA, bands * 0.7 + fine * 0.3) * gap;
+            }
+
+            void main() {
+                vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / min(uRes.x, uRes.y);
+                vec3 ro = vec3(0.0, 0.0, 3.35 / uZoom);
+                vec3 rd = normalize(vec3(uv, -1.65));
+
+                // Clean matte deep-chart starfield (no purple/indigo nebula wash)
+                vec3 bg = vec3(0.051, 0.067, 0.082);
+                vec3 starCell = floor(rd * 280.0);
+                float st = hash31(starCell);
+                if (st > 0.995) {
+                    vec3 starTint = mix(vec3(0.86, 0.9, 0.95), vec3(0.98, 0.91, 0.78), fract(st * 97.3));
+                    bg += starTint * smoothstep(0.995, 1.0, st) * 1.25;
+                }
+
+                vec3 sunDir = normalize(vec3(sin(uSunAngle), 0.22, cos(uSunAngle)));
+                mat3 planetRot = rotX(uPitch) * rotY(uYaw);
+                vec3 atmoCol = getAtmoColor(uBiome);
+
+                vec2 pHit = intersectSphere(ro, rd, vec3(0.0), 1.0);
+                float bestT = 1e6;
+                vec3 col = bg;
+
+                float bLimb = dot(ro, rd);
+                float distToCenter = sqrt(max(0.0, dot(ro, ro) - bLimb * bLimb));
+                if (uAtmo > 0.01 && distToCenter > 0.985 && distToCenter < 1.32) {
+                    float glow = exp(-(distToCenter - 1.0) * 10.5) * uAtmo;
+                    vec3 limbPt = normalize(ro + rd * (-bLimb));
+                    float sunLimb = smoothstep(-0.35, 0.8, dot(limbPt, sunDir));
+                    col += atmoCol * glow * (0.18 + 0.82 * sunLimb) * 0.72;
+                }
+
+                if (pHit.x > 0.0) {
+                    bestT = pHit.x;
+                    vec3 hitPos = ro + rd * pHit.x;
+                    vec3 n = normalize(hitPos);
+                    vec3 objPos = planetRot * n;
+                    vec3 seedOff = vec3(uSeed * 0.13, uSeed * 0.29, uSeed * 0.07);
+
+                    float elev = (uBiome > 4.5)
+                        ? 0.5 + 0.45 * sin((objPos.y + fbm(objPos * 3.2 + seedOff) * 0.32) * 14.0 + uSeed)
+                        : fbm(objPos * 2.55 + seedOff);
+
+                    float ndl = dot(n, sunDir);
+                    float diff = smoothstep(-0.08, 0.92, ndl);
+                    float sea = mix(0.26, 0.72, uSeaLevel);
+                    float lat = abs(objPos.y);
+
+                    vec3 surfCol = vec3(0.0);
+                    float specMask = 0.0, isLand = 0.0, isLava = 0.0;
+
+                    if (uBiome < 0.5) {
+                        if (elev < sea) {
+                            surfCol = mix(vec3(0.11, 0.44, 0.62), vec3(0.04, 0.16, 0.32), clamp((sea - elev) / 0.25, 0.0, 1.0));
+                            specMask = 0.7;
+                        } else {
+                            isLand = 1.0;
+                            float h = clamp((elev - sea) / (1.0 - sea), 0.0, 1.0);
+                            surfCol = mix(vec3(0.82, 0.76, 0.58), vec3(0.22, 0.45, 0.25), smoothstep(0.0, 0.08, h));
+                            surfCol = mix(surfCol, vec3(0.15, 0.32, 0.20), smoothstep(0.18, 0.45, h));
+                            surfCol = mix(surfCol, vec3(0.46, 0.42, 0.38), smoothstep(0.55, 0.78, h));
+                            surfCol = mix(surfCol, vec3(0.92, 0.94, 0.95), smoothstep(0.78, 0.92, h));
+                        }
+                        float ice = smoothstep(0.76, 0.90, lat + (elev - 0.5) * 0.18);
+                        surfCol = mix(surfCol, vec3(0.92, 0.95, 0.97), ice);
+                        specMask *= (1.0 - ice);
+                    } else if (uBiome < 1.5) {
+                        if (elev < sea * 0.75) { surfCol = vec3(0.38, 0.20, 0.14); specMask = 0.1; }
+                        else { isLand = 1.0; surfCol = mix(vec3(0.68, 0.33, 0.20), vec3(0.86, 0.58, 0.36), clamp((elev - sea * 0.75) * 2.0, 0.0, 1.0)); }
+                        surfCol = mix(surfCol, vec3(0.94, 0.89, 0.84), smoothstep(0.84, 0.95, lat));
+                    } else if (uBiome < 2.5) {
+                        if (elev < sea) { surfCol = mix(vec3(0.18, 0.46, 0.62), vec3(0.09, 0.22, 0.34), clamp((sea - elev) * 4.0, 0.0, 1.0)); specMask = 0.8; }
+                        else { isLand = 1.0; surfCol = mix(vec3(0.70, 0.84, 0.92), vec3(0.94, 0.97, 0.98), clamp((elev - sea) * 2.5, 0.0, 1.0)); specMask = 0.28; }
+                    } else if (uBiome < 3.5) {
+                        if (elev < sea) { surfCol = mix(vec3(0.98, 0.50, 0.12), vec3(0.80, 0.14, 0.04), smoothstep(sea, sea - 0.14, elev)); isLava = 1.0; }
+                        else { isLand = 1.0; surfCol = mix(vec3(0.15, 0.13, 0.14), vec3(0.32, 0.27, 0.24), clamp((elev - sea) * 2.5, 0.0, 1.0)); }
+                    } else if (uBiome < 4.5) {
+                        if (elev < sea) { surfCol = mix(vec3(0.10, 0.46, 0.48), vec3(0.06, 0.18, 0.26), clamp((sea - elev) * 4.0, 0.0, 1.0)); specMask = 0.65; }
+                        else { isLand = 1.0; surfCol = mix(vec3(0.56, 0.38, 0.24), vec3(0.28, 0.56, 0.46), clamp((elev - sea) * 2.5, 0.0, 1.0)); }
+                    } else {
+                        float detail = fbm(objPos * 6.0 + seedOff);
+                        surfCol = mix(vec3(0.64, 0.44, 0.28), vec3(0.86, 0.74, 0.55), elev);
+                        surfCol = mix(surfCol, vec3(0.93, 0.88, 0.78), smoothstep(0.55, 0.82, detail) * 0.55);
+                    }
+
+                    vec3 halfVec = normalize(sunDir - rd);
+                    float spec = pow(max(dot(n, halfVec), 0.0), 36.0) * specMask * diff;
+
+                    float cloudVal = 0.0;
+                    if (uClouds > 0.01 && uBiome < 4.5) {
+                        float cn = fbm((rotY(uTime * 0.03) * objPos) * 3.4 + seedOff * 1.7 + vec3(4.2));
+                        cloudVal = smoothstep(1.0 - uClouds * 0.78, 1.0 - uClouds * 0.78 + 0.28, cn) * uClouds;
+                    }
+
+                    float ringShadow = 1.0;
+                    if (uRings > 0.02) {
+                        vec3 rNorm = normalize(vec3(0.24, 0.92, 0.31));
+                        float denom = dot(sunDir, rNorm);
+                        if (abs(denom) > 0.001) {
+                            float tR = -dot(hitPos, rNorm) / denom;
+                            if (tR > 0.0) {
+                                float rDist = length(hitPos + sunDir * tR);
+                                if (rDist > 1.28 && rDist < 1.32 + uRings * 0.95) ringShadow = 0.45;
+                            }
+                        }
+                    }
+
+                    vec3 lit = surfCol * (0.04 + 0.96 * diff * ringShadow) + vec3(1.0, 0.96, 0.88) * spec * 0.6 * ringShadow;
+                    if (isLava > 0.5) lit = mix(lit, surfCol * 1.3, 0.82);
+
+                    vec3 cloudCol = vec3(0.95, 0.95, 0.93) * (0.04 + 0.96 * diff * ringShadow);
+                    lit = mix(lit, cloudCol, cloudVal * 0.8);
+
+                    if (uLights > 0.01 && isLand > 0.5 && uBiome < 4.5) {
+                        float nightMask = smoothstep(0.08, -0.22, ndl);
+                        float cityCluster = fbm(objPos * 12.5 + seedOff * 2.1);
+                        float cityFine = noise3(objPos * 46.0 + seedOff);
+                        float coastBonus = smoothstep(0.28, 0.02, abs(elev - sea));
+                        float tempMask = 1.0 - smoothstep(0.65, 0.88, lat);
+                        float lm = smoothstep(0.64 - uLights * 0.16, 0.76, cityCluster + coastBonus * 0.16) * smoothstep(0.42, 0.78, cityFine) * tempMask;
+                        lit += mix(vec3(1.0, 0.68, 0.24), vec3(1.0, 0.9, 0.64), cityFine) * lm * nightMask * uLights * 2.3 * (1.0 - cloudVal * 0.55);
+                    }
+
+                    float fresnel = pow(1.0 - max(dot(n, -rd), 0.0), 3.4);
+                    lit += atmoCol * fresnel * uAtmo * (0.15 + 0.85 * smoothstep(-0.3, 0.7, ndl));
+                    col = lit;
+                }
+
+                if (uRings > 0.02) {
+                    vec3 ringNormal = normalize(vec3(0.24, 0.92, 0.31));
+                    float denom = dot(rd, ringNormal);
+                    if (abs(denom) > 0.0001) {
+                        float tRing = -dot(ro, ringNormal) / denom;
+                        if (tRing > 0.0 && tRing < bestT) {
+                            vec3 rPos = ro + rd * tRing;
+                            float rDist = length(rPos), innerR = 1.26, outerR = 1.32 + uRings * 0.98;
+                            if (rDist > innerR && rDist < outerR) {
+                                float rNorm = (rDist - innerR) / (outerR - innerR);
+                                float edgeFade = smoothstep(0.0, 0.08, rNorm) * smoothstep(1.0, 0.88, rNorm);
+                                vec3 rCol = getRingColor(rNorm, uBiome);
+                                float shadow = (intersectSphere(rPos, sunDir, vec3(0.0), 1.0).x > 0.0) ? 0.14 : 1.0;
+                                col = mix(col, rCol * shadow, clamp(edgeFade * (0.48 + 0.38 * uRings), 0.0, 0.92));
+                            }
+                        }
+                    }
+                }
+
+                int moonCount = int(uMoons + 0.5);
+                for (int i = 0; i < 4; i++) {
+                    if (i >= moonCount) break;
+                    float fi = float(i);
+                    float orbitR = 1.55 + fi * 0.34;
+                    float speed = (0.42 - fi * 0.07) * (mod(fi, 2.0) < 0.5 ? 1.0 : -1.0);
+                    float ang = uTime * speed + fi * 1.9 + uSeed * 0.1;
+                    vec3 mPos = vec3(cos(ang) * orbitR, sin(ang) * orbitR * (fi - 1.5) * 0.22, sin(ang) * orbitR);
+                    float mRad = 0.095 + mod(fi * 0.037, 0.065);
+                    vec2 mHit = intersectSphere(ro, rd, mPos, mRad);
+                    if (mHit.x > 0.0 && mHit.x < bestT) {
+                        bestT = mHit.x;
+                        vec3 hp = ro + rd * mHit.x, mn = normalize(hp - mPos);
+                        vec3 mBase = mix(vec3(0.38, 0.38, 0.38), vec3(0.76, 0.74, 0.70), fbm(mn * 4.5 + vec3(fi * 7.0 + uSeed)));
+                        float mDiff = smoothstep(-0.08, 0.92, dot(mn, sunDir));
+                        float ecl = (intersectSphere(hp, sunDir, vec3(0.0), 1.0).x > 0.0) ? 0.12 : 1.0;
+                        col = mBase * (0.04 + 0.96 * mDiff * ecl);
+                    }
+                }
+
+                col = col / (col + vec3(0.88));
+                col = pow(col, vec3(0.95));
+                gl_FragColor = vec4(col, 1.0);
+            }
+        `;
+
+        function compile(type, src) {
+            const sh = gl.createShader(type);
+            gl.shaderSource(sh, src);
+            gl.compileShader(sh);
+            return sh;
+        }
+        const prog = gl.createProgram();
+        gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT_SRC));
+        gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG_SRC));
+        gl.linkProgram(prog);
+        gl.useProgram(prog);
+
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+        const locPos = gl.getAttribLocation(prog, 'aPos');
+        gl.enableVertexAttribArray(locPos);
+        gl.vertexAttribPointer(locPos, 2, gl.FLOAT, false, 0, 0);
+
+        const U = {};
+        ['uRes','uTime','uSeed','uYaw','uPitch','uZoom','uSeaLevel','uAtmo','uClouds','uRings','uMoons','uLights','uSunAngle','uBiome']
+            .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
+
+        const BIOME_META = [
+            { cls: 'CLASS-M TERRAN',   sea: 52, atmo: 65, clouds: 48, rings: 45, lights: 78 },
+            { cls: 'CLASS-D ARID',     sea: 24, atmo: 38, clouds: 15, rings: 18, lights: 12 },
+            { cls: 'CLASS-P CRYO',     sea: 46, atmo: 62, clouds: 34, rings: 64, lights: 22 },
+            { cls: 'CLASS-Y VOLCANIC', sea: 42, atmo: 55, clouds: 28, rings: 10, lights: 0  },
+            { cls: 'CLASS-X EXO-BIO',  sea: 56, atmo: 76, clouds: 52, rings: 72, lights: 80 },
+            { cls: 'CLASS-J JOVIAN',   sea: 50, atmo: 72, clouds: 0,  rings: 92, lights: 0  }
+        ];
+        const PREFIXES = ['Aurelia', 'Kepler', 'Vespera', 'Novara', 'Solis', 'Calypso', 'Hyperion', 'Thalassa', 'Lyra', 'Kestrel'];
+        const SUFFIXES = ['Prime', 'IV', 'IX', '442b', 'Major', 'VII', 'Reach'];
+
+        const state = { seed: 4821, biome: 0, sea: 52, atmo: 65, clouds: 48, rings: 45, moons: 2, lights: 78, sun: 35, yaw: 0.4, pitch: 0.22, zoom: 1.0, autoSpin: true };
+
+        function updateTelemetry() {
+            document.getElementById('planet-class').textContent = BIOME_META[state.biome].cls;
+            document.getElementById('stat-seed').textContent = '#' + state.seed;
+            document.getElementById('stat-moons').textContent = String(state.moons);
+            let hab = 20;
+            if (state.biome === 0) hab = Math.round(98 - Math.abs(state.sea - 55) * 0.7 - Math.abs(state.atmo - 65) * 0.4);
+            else if (state.biome === 4) hab = Math.round(78 - Math.abs(state.sea - 50) * 0.5);
+            else if (state.biome === 2) hab = Math.round(44 - state.sea * 0.2);
+            else if (state.biome === 1) hab = Math.round(35 + state.atmo * 0.25);
+            else hab = Math.round(4 + (state.seed % 9));
+            document.getElementById('stat-hab').textContent = Math.max(2, Math.min(99, hab)) + '%';
+            document.getElementById('stat-pop').textContent = (state.biome === 5 || state.biome === 3 || state.lights === 0) ? 'NONE' : (state.lights * 0.11).toFixed(1) + 'B';
+        }
+
+        function syncSliders() {
+            const set = (id, vId, v, f) => { document.getElementById(id).value = v; document.getElementById(vId).textContent = f(v); };
+            set('sl-sea', 'val-sea', state.sea, v => v + '%');
+            set('sl-atmo', 'val-atmo', state.atmo, v => v + '%');
+            set('sl-clouds', 'val-clouds', state.clouds, v => v + '%');
+            set('sl-rings', 'val-rings', state.rings, v => v + '%');
+            set('sl-moons', 'val-moons', state.moons, v => String(v));
+            set('sl-lights', 'val-lights', state.lights, v => v + '%');
+            set('sl-sun', 'val-sun', state.sun, v => v + '°');
+            updateTelemetry();
+        }
+
+        function resize() {
+            const r = canvas.parentElement.getBoundingClientRect();
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.max(200, Math.floor(r.width * dpr));
+            canvas.height = Math.max(200, Math.floor(r.height * dpr));
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+        window.addEventListener('resize', resize);
+
+        let dragging = false, lx = 0, ly = 0;
+        canvas.addEventListener('pointerdown', e => { dragging = true; lx = e.clientX; ly = e.clientY; canvas.setPointerCapture(e.pointerId); });
+        canvas.addEventListener('pointermove', e => {
+            if (!dragging) return;
+            state.yaw += (e.clientX - lx) * 0.008;
+            state.pitch = Math.max(-1.35, Math.min(1.35, state.pitch + (e.clientY - ly) * 0.008));
+            lx = e.clientX; ly = e.clientY;
+        });
+        window.addEventListener('pointerup', () => { dragging = false; });
+        canvas.addEventListener('wheel', e => { e.preventDefault(); state.zoom = Math.max(0.65, Math.min(1.75, state.zoom - e.deltaY * 0.0008)); }, { passive: false });
+
+        document.querySelectorAll('.biome-btn').forEach(btn => btn.addEventListener('click', () => {
+            state.biome = Number(btn.dataset.biome);
+            Object.assign(state, BIOME_META[state.biome]);
+            document.querySelectorAll('.biome-btn').forEach(b => b.classList.toggle('active', b === btn));
+            syncSliders();
+        }));
+
+        const bind = (id, vId, key, f) => document.getElementById(id).addEventListener('input', e => {
+            state[key] = Number(e.target.value);
+            document.getElementById(vId).textContent = f(state[key]);
+            updateTelemetry();
+        });
+        bind('sl-sea', 'val-sea', 'sea', v => v + '%');
+        bind('sl-atmo', 'val-atmo', 'atmo', v => v + '%');
+        bind('sl-clouds', 'val-clouds', 'clouds', v => v + '%');
+        bind('sl-rings', 'val-rings', 'rings', v => v + '%');
+        bind('sl-moons', 'val-moons', 'moons', v => String(v));
+        bind('sl-lights', 'val-lights', 'lights', v => v + '%');
+        bind('sl-sun', 'val-sun', 'sun', v => v + '°');
+
+        document.getElementById('toggle-spin').addEventListener('click', e => {
+            state.autoSpin = !state.autoSpin;
+            e.currentTarget.textContent = state.autoSpin ? 'ON' : 'OFF';
+            e.currentTarget.classList.toggle('off', !state.autoSpin);
+        });
+
+        document.getElementById('btn-randomize').addEventListener('click', () => {
+            state.seed = 1000 + Math.floor(Math.random() * 8999);
+            state.biome = Math.floor(Math.random() * BIOME_META.length);
+            const m = BIOME_META[state.biome];
+            state.sea = Math.max(10, Math.min(85, m.sea + Math.floor((Math.random() - 0.5) * 26)));
+            state.atmo = Math.max(15, Math.min(100, m.atmo + Math.floor((Math.random() - 0.5) * 30)));
+            state.clouds = state.biome === 5 ? 0 : Math.floor(Math.random() * 75);
+            state.rings = Math.random() < 0.55 ? (25 + Math.floor(Math.random() * 75)) : 0;
+            state.moons = Math.floor(Math.random() * 5);
+            state.lights = (state.biome === 0 || state.biome === 4) ? (35 + Math.floor(Math.random() * 65)) : (Math.random() < 0.3 ? 30 : 0);
+            state.sun = Math.floor(Math.random() * 140) - 70;
+            document.getElementById('planet-name').textContent = PREFIXES[state.seed % PREFIXES.length] + ' ' + SUFFIXES[(state.seed >> 3) % SUFFIXES.length];
+            document.querySelectorAll('.biome-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.biome) === state.biome));
+            syncSliders();
+        });
+
+        document.getElementById('btn-snapshot').addEventListener('click', () => {
+            const a = document.createElement('a');
+            a.download = document.getElementById('planet-name').textContent.toLowerCase().replace(/\s+/g, '-') + '.png';
+            a.href = canvas.toDataURL('image/png');
+            a.click();
+        });
+
+        let lastTime = performance.now();
+        function frame(now) {
+            requestAnimationFrame(frame);
+            const dt = (now - lastTime) * 0.001;
+            lastTime = now;
+            if (state.autoSpin && !dragging) state.yaw += dt * 0.22;
+
+            gl.uniform2f(U.uRes, canvas.width, canvas.height);
+            gl.uniform1f(U.uTime, now * 0.001);
+            gl.uniform1f(U.uSeed, state.seed);
+            gl.uniform1f(U.uYaw, state.yaw);
+            gl.uniform1f(U.uPitch, state.pitch);
+            gl.uniform1f(U.uZoom, state.zoom);
+            gl.uniform1f(U.uSeaLevel, state.sea / 100);
+            gl.uniform1f(U.uAtmo, state.atmo / 100);
+            gl.uniform1f(U.uClouds, state.clouds / 100);
+            gl.uniform1f(U.uRings, state.rings / 100);
+            gl.uniform1f(U.uMoons, state.moons);
+            gl.uniform1f(U.uLights, state.lights / 100);
+            gl.uniform1f(U.uSunAngle, (state.sun * Math.PI) / 180);
+            gl.uniform1f(U.uBiome, state.biome);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+
+        resize();
+        syncSliders();
+        requestAnimationFrame(frame);
+    })();
+    </script>
+</body>
+</html>

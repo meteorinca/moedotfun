@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boids | moe.fun</title>
+    <link rel="icon" href="../../assets/logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper: #f6f1e7;
+            --margin: #ede6d8;
+            --ink: #1b1a17;
+            --ink-muted: #6c6558;
+            --rule: #d3cab9;
+            --vermilion: #c43728;
+            --pine: #2e5d47;
+            --indigo: #23456b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Mono', monospace;
+            background: var(--paper);
+            color: var(--ink);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: var(--paper);
+            border-bottom: 1.5px solid var(--ink);
+            padding: 0.7rem 1.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: baseline;
+            gap: 1.25rem;
+        }
+
+        .back-link {
+            color: var(--ink-muted);
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 500;
+            border-bottom: 1px solid transparent;
+        }
+        .back-link:hover { color: var(--ink); border-color: var(--ink); }
+
+        .header-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+
+        .hud-stats {
+            display: flex;
+            align-items: center;
+            gap: 1.15rem;
+            font-size: 0.72rem;
+            color: var(--ink-muted);
+            letter-spacing: 0.03em;
+        }
+        .hud-stats strong { color: var(--ink); font-weight: 500; }
+
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 296px;
+            min-height: 0;
+        }
+
+        .stage-wrap {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--paper);
+        }
+
+        #sim-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .stage-caption {
+            position: absolute;
+            bottom: 14px;
+            left: 16px;
+            background: rgba(246, 241, 231, 0.92);
+            border: 1px solid var(--rule);
+            padding: 0.32rem 0.7rem;
+            font-size: 0.72rem;
+            color: var(--ink-muted);
+            pointer-events: none;
+        }
+        .stage-caption strong { color: var(--ink); }
+
+        /* Field-Notebook Sidebar */
+        .sidebar {
+            background: var(--margin);
+            border-left: 1.5px solid var(--ink);
+            padding: 1rem 1.1rem 1.35rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.05rem;
+        }
+
+        .section-head {
+            font-family: 'Fraunces', serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--ink);
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid var(--rule);
+            margin-bottom: 0.55rem;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem;
+        }
+
+        .tool-btn {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.74rem;
+            padding: 0.48rem 0.55rem;
+            border: 1px solid #bdb3a1;
+            background: var(--paper);
+            color: var(--ink);
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            transition: background 0.12s, border-color 0.12s;
+        }
+        .tool-btn:hover { border-color: var(--ink); }
+        .tool-btn.active {
+            background: var(--ink);
+            color: var(--paper);
+            border-color: var(--ink);
+        }
+        .tool-btn.span-2 { grid-column: span 2; justify-content: center; }
+
+        .swatch {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .presets-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+        .chip-btn {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            padding: 0.3rem 0.58rem;
+            border: 1px solid #bdb3a1;
+            background: transparent;
+            color: var(--ink-muted);
+            cursor: pointer;
+        }
+        .chip-btn:hover { color: var(--ink); border-color: var(--ink); }
+        .chip-btn.active {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: var(--paper);
+        }
+
+        .slider-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.68rem;
+        }
+        .slider-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .slider-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+        }
+        .slider-val { color: var(--ink-muted); }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 2px;
+            background: #b8ae9c;
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: var(--ink);
+            cursor: pointer;
+        }
+
+        .ink-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.4rem;
+        }
+        .ink-btn {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.66rem;
+            padding: 0.36rem 0.2rem;
+            border: 1px solid #bdb3a1;
+            background: var(--paper);
+            color: var(--ink);
+            cursor: pointer;
+            text-align: center;
+        }
+        .ink-btn.active {
+            border-color: var(--ink);
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .actions-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem;
+            margin-top: auto;
+            padding-top: 0.6rem;
+            border-top: 1px solid var(--rule);
+        }
+        .action-btn {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem;
+            padding: 0.48rem 0.5rem;
+            border: 1px solid var(--ink);
+            background: var(--paper);
+            color: var(--ink);
+            cursor: pointer;
+        }
+        .action-btn:hover { background: var(--ink); color: var(--paper); }
+        .action-btn.danger { color: var(--vermilion); border-color: var(--vermilion); }
+        .action-btn.danger:hover { background: var(--vermilion); color: var(--paper); }
+
+        @media (max-width: 860px) {
+            body { height: auto; overflow: auto; }
+            .workspace { grid-template-columns: 1fr; }
+            .stage-wrap { height: 60vh; min-height: 360px; }
+            .sidebar { border-left: none; border-top: 1.5px solid var(--ink); }
+            .hud-stats { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <a href="../../index.html" class="back-link">← moe.fun</a>
+            <h1 class="header-title">Boids</h1>
+        </div>
+        <div class="hud-stats">
+            <span>FLOCK <strong id="hud-boids">220</strong></span>
+            <span>HAWKS <strong id="hud-preds">1</strong></span>
+            <span>FORAGED <strong id="hud-eaten">0</strong></span>
+            <span>FPS <strong id="hud-fps">60</strong></span>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <div class="stage-wrap">
+            <canvas id="sim-canvas"></canvas>
+            <div class="stage-caption" id="stage-hint">Brush: <strong>Seed</strong> — click or drag on paper</div>
+        </div>
+
+        <aside class="sidebar">
+            <div>
+                <div class="section-head">Field Brush</div>
+                <div class="tools-grid">
+                    <button class="tool-btn active" data-tool="food"><span class="swatch" style="background:#2e5d47"></span>Seed</button>
+                    <button class="tool-btn" data-tool="predator"><span class="swatch" style="background:#c43728"></span>Hawk</button>
+                    <button class="tool-btn" data-tool="wall"><span class="swatch" style="background:#6c6558"></span>Stone</button>
+                    <button class="tool-btn" data-tool="boid"><span class="swatch" style="background:#1b1a17"></span>Bird</button>
+                    <button class="tool-btn span-2" data-tool="erase">Erase Marks</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-head">Study Presets</div>
+                <div class="presets-wrap">
+                    <button class="chip-btn active" data-preset="murmuration">Murmuration</button>
+                    <button class="chip-btn" data-preset="baitball">Swirl</button>
+                    <button class="chip-btn" data-preset="river">Stream</button>
+                    <button class="chip-btn" data-preset="chaos">Scatter</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-head">Parameters</div>
+                <div class="slider-list">
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Separation</span><span class="slider-val" id="val-sep">1.55</span></div>
+                        <input type="range" id="sl-sep" min="0" max="4" step="0.05" value="1.55">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Alignment</span><span class="slider-val" id="val-ali">1.35</span></div>
+                        <input type="range" id="sl-ali" min="0" max="4" step="0.05" value="1.35">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Cohesion</span><span class="slider-val" id="val-coh">1.10</span></div>
+                        <input type="range" id="sl-coh" min="0" max="4" step="0.05" value="1.10">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Sight Radius</span><span class="slider-val" id="val-rad">64 px</span></div>
+                        <input type="range" id="sl-rad" min="25" max="140" step="1" value="64">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Speed</span><span class="slider-val" id="val-spd">4.2</span></div>
+                        <input type="range" id="sl-spd" min="1.5" max="8" step="0.1" value="4.2">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Flock Size</span><span class="slider-val" id="val-cnt">220</span></div>
+                        <input type="range" id="sl-cnt" min="40" max="420" step="10" value="220">
+                    </div>
+                    <div class="slider-item">
+                        <div class="slider-head"><span>Ink Wash</span><span class="slider-val" id="val-trl">70%</span></div>
+                        <input type="range" id="sl-trl" min="0" max="94" step="1" value="70">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-head">Pigment</div>
+                <div class="ink-row">
+                    <button class="ink-btn active" data-palette="sumi">Sumi</button>
+                    <button class="ink-btn" data-palette="indigo">Indigo</button>
+                    <button class="ink-btn" data-palette="ochre">Sienna</button>
+                    <button class="ink-btn" data-palette="pine">Pine</button>
+                </div>
+            </div>
+
+            <div class="actions-row">
+                <button class="action-btn" id="btn-pause">Pause</button>
+                <button class="action-btn" id="btn-clear-objs">Clear Ink</button>
+                <button class="action-btn danger" id="btn-reset" style="grid-column:span 2">Reset Page</button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+    (() => {
+        const canvas = document.getElementById('sim-canvas');
+        const ctx = canvas.getContext('2d');
+
+        const PALETTES = {
+            sumi:   { h: 35,  s: 12, lMin: 12, lMax: 30 },
+            indigo: { h: 212, s: 52, lMin: 20, lMax: 38 },
+            ochre:  { h: 20,  s: 58, lMin: 28, lMax: 44 },
+            pine:   { h: 152, s: 38, lMin: 20, lMax: 36 }
+        };
+
+        const TOOL_HINTS = {
+            food:     'Brush: <strong>Seed</strong> — click or drag to scatter seeds',
+            predator: 'Brush: <strong>Hawk</strong> — click to release a predator',
+            wall:     'Brush: <strong>Stone</strong> — drag to place barrier stones',
+            boid:     'Brush: <strong>Bird</strong> — click or drag to add birds',
+            erase:    'Brush: <strong>Erase</strong> — drag over stones, seeds, or hawks'
+        };
+
+        const cfg = {
+            sep: 1.55, ali: 1.35, coh: 1.10, radius: 64, maxSpeed: 4.2,
+            targetCount: 220, trail: 70, palette: 'sumi', tool: 'food', paused: false
+        };
+
+        let W = 800, H = 600;
+        let boids = [], foods = [], predators = [], walls = [], sparks = [];
+        let foodEaten = 0;
+
+        function resize() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            W = Math.max(300, Math.floor(rect.width));
+            H = Math.max(300, Math.floor(rect.height));
+            canvas.width = W;
+            canvas.height = H;
+            ctx.fillStyle = '#f6f1e7';
+            ctx.fillRect(0, 0, W, H);
+        }
+        window.addEventListener('resize', resize);
+
+        function createBoid(x, y) {
+            const a = Math.random() * Math.PI * 2, s = 2 + Math.random() * 2;
+            return { x: x ?? Math.random() * W, y: y ?? Math.random() * H, vx: Math.cos(a) * s, vy: Math.sin(a) * s, boost: 0, seed: Math.random() };
+        }
+        function createPredator(x, y) {
+            const a = Math.random() * Math.PI * 2;
+            return { x: x ?? W * 0.5, y: y ?? H * 0.5, vx: Math.cos(a) * 3.2, vy: Math.sin(a) * 3.2 };
+        }
+        function spawnSparks(x, y, color, count = 7) {
+            for (let i = 0; i < count; i++) {
+                const a = Math.random() * Math.PI * 2, s = 0.8 + Math.random() * 2.2;
+                sparks.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, color });
+            }
+        }
+        function syncBoidCount() {
+            while (boids.length < cfg.targetCount) boids.push(createBoid());
+            if (boids.length > cfg.targetCount) boids.length = cfg.targetCount;
+        }
+
+        function applyPreset(name) {
+            document.querySelectorAll('.chip-btn').forEach(b => b.classList.toggle('active', b.dataset.preset === name));
+            if (name === 'murmuration') {
+                Object.assign(cfg, { sep: 1.55, ali: 1.35, coh: 1.15, radius: 66, maxSpeed: 4.2, targetCount: 220, trail: 70 });
+                predators = [createPredator(W * 0.5, H * 0.5)];
+            } else if (name === 'baitball') {
+                Object.assign(cfg, { sep: 1.15, ali: 1.0, coh: 2.6, radius: 85, maxSpeed: 4.5, targetCount: 260, trail: 64 });
+                predators = [createPredator(W * 0.35, H * 0.4), createPredator(W * 0.65, H * 0.6)];
+            } else if (name === 'river') {
+                Object.assign(cfg, { sep: 1.1, ali: 2.8, coh: 0.75, radius: 75, maxSpeed: 5.2, targetCount: 240, trail: 86 });
+                predators = [];
+            } else if (name === 'chaos') {
+                Object.assign(cfg, { sep: 2.9, ali: 0.4, coh: 0.9, radius: 50, maxSpeed: 6.4, targetCount: 260, trail: 52 });
+                predators = [createPredator(W * 0.5, H * 0.5)];
+            }
+            syncBoidCount();
+            syncSlidersUI();
+        }
+
+        function syncSlidersUI() {
+            const set = (id, vId, v, f) => { document.getElementById(id).value = v; document.getElementById(vId).textContent = f(v); };
+            set('sl-sep', 'val-sep', cfg.sep, v => v.toFixed(2));
+            set('sl-ali', 'val-ali', cfg.ali, v => v.toFixed(2));
+            set('sl-coh', 'val-coh', cfg.coh, v => v.toFixed(2));
+            set('sl-rad', 'val-rad', cfg.radius, v => `${v} px`);
+            set('sl-spd', 'val-spd', cfg.maxSpeed, v => v.toFixed(1));
+            set('sl-cnt', 'val-cnt', cfg.targetCount, v => String(v));
+            set('sl-trl', 'val-trl', cfg.trail, v => `${v}%`);
+        }
+
+        const grid = new Map();
+        function updateSimulation() {
+            const cellSize = Math.max(30, cfg.radius);
+            grid.clear();
+            for (let i = 0; i < boids.length; i++) {
+                const b = boids[i];
+                const key = `${Math.floor(b.x / cellSize)},${Math.floor(b.y / cellSize)}`;
+                let bucket = grid.get(key);
+                if (!bucket) { bucket = []; grid.set(key, bucket); }
+                bucket.push(b);
+            }
+
+            const radSq = cfg.radius * cfg.radius;
+            const sepDistSq = (cfg.radius * 0.42) ** 2;
+            const maxForce = 0.16;
+
+            for (let i = 0; i < boids.length; i++) {
+                const b = boids[i];
+                const gx = Math.floor(b.x / cellSize), gy = Math.floor(b.y / cellSize);
+                let sepX = 0, sepY = 0, sepN = 0, aliX = 0, aliY = 0, aliN = 0, cohX = 0, cohY = 0, cohN = 0;
+
+                for (let dx = -1; dx <= 1; dx++) {
+                    for (let dy = -1; dy <= 1; dy++) {
+                        const bucket = grid.get(`${gx + dx},${gy + dy}`);
+                        if (!bucket) continue;
+                        for (let j = 0; j < bucket.length; j++) {
+                            const o = bucket[j];
+                            if (o === b) continue;
+                            const ddx = o.x - b.x, ddy = o.y - b.y, d2 = ddx * ddx + ddy * ddy;
+                            if (d2 > 0 && d2 < radSq) {
+                                aliX += o.vx; aliY += o.vy; aliN++;
+                                cohX += o.x;  cohY += o.y;  cohN++;
+                                if (d2 < sepDistSq) {
+                                    const inv = 1 / Math.sqrt(d2);
+                                    sepX -= ddx * inv * inv; sepY -= ddy * inv * inv; sepN++;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                let ax = 0, ay = 0;
+                if (sepN > 0) { const m = Math.hypot(sepX, sepY) || 1; ax += ((sepX / m) * cfg.maxSpeed - b.vx) * 0.06 * cfg.sep; ay += ((sepY / m) * cfg.maxSpeed - b.vy) * 0.06 * cfg.sep; }
+                if (aliN > 0) { aliX /= aliN; aliY /= aliN; const m = Math.hypot(aliX, aliY) || 1; ax += ((aliX / m) * cfg.maxSpeed - b.vx) * 0.05 * cfg.ali; ay += ((aliY / m) * cfg.maxSpeed - b.vy) * 0.05 * cfg.ali; }
+                if (cohN > 0) { const tx = cohX / cohN - b.x, ty = cohY / cohN - b.y, m = Math.hypot(tx, ty) || 1; ax += ((tx / m) * cfg.maxSpeed - b.vx) * 0.045 * cfg.coh; ay += ((ty / m) * cfg.maxSpeed - b.vy) * 0.045 * cfg.coh; }
+
+                for (let f = foods.length - 1; f >= 0; f--) {
+                    const food = foods[f], ddx = food.x - b.x, ddy = food.y - b.y, d2 = ddx * ddx + ddy * ddy;
+                    if (d2 < 190 * 190) {
+                        const d = Math.sqrt(d2) || 1;
+                        ax += (ddx / d) * 0.24; ay += (ddy / d) * 0.24;
+                        if (d < 13) {
+                            food.energy--; b.boost = 1; foodEaten++;
+                            spawnSparks(food.x, food.y, '#2e5d47', 5);
+                            if (food.energy <= 0) foods.splice(f, 1);
+                        }
+                    }
+                }
+                for (let p = 0; p < predators.length; p++) {
+                    const pred = predators[p], ddx = b.x - pred.x, ddy = b.y - pred.y, d2 = ddx * ddx + ddy * ddy;
+                    if (d2 < 145 * 145 && d2 > 0.01) {
+                        const d = Math.sqrt(d2), str = (1 - d / 145) * 0.95;
+                        ax += (ddx / d) * str; ay += (ddy / d) * str;
+                    }
+                }
+                for (let w = 0; w < walls.length; w++) {
+                    const wall = walls[w], ddx = b.x - wall.x, ddy = b.y - wall.y, d2 = ddx * ddx + ddy * ddy, ar = wall.r + 36;
+                    if (d2 < ar * ar && d2 > 0.01) {
+                        const d = Math.sqrt(d2), push = (1 - d / ar) * 1.15;
+                        ax += (ddx / d) * push; ay += (ddy / d) * push;
+                    }
+                }
+
+                const m = 42;
+                if (b.x < m) ax += 0.28; else if (b.x > W - m) ax -= 0.28;
+                if (b.y < m) ay += 0.28; else if (b.y > H - m) ay -= 0.28;
+
+                const aMag = Math.hypot(ax, ay);
+                if (aMag > maxForce * 5) { ax = (ax / aMag) * maxForce * 5; ay = (ay / aMag) * maxForce * 5; }
+
+                b.vx += ax; b.vy += ay;
+                b.boost = Math.max(0, b.boost - 0.025);
+
+                const topSpd = cfg.maxSpeed * (1 + b.boost * 0.45);
+                const spd = Math.hypot(b.vx, b.vy) || 1;
+                const minSpd = cfg.maxSpeed * 0.48;
+                if (spd > topSpd) { b.vx = (b.vx / spd) * topSpd; b.vy = (b.vy / spd) * topSpd; }
+                else if (spd < minSpd) { b.vx = (b.vx / spd) * minSpd; b.vy = (b.vy / spd) * minSpd; }
+
+                b.x += b.vx; b.y += b.vy;
+                if (b.x < 0) b.x = W; else if (b.x > W) b.x = 0;
+                if (b.y < 0) b.y = H; else if (b.y > H) b.y = 0;
+            }
+
+            for (let p = 0; p < predators.length; p++) {
+                const pred = predators[p];
+                let cx = 0, cy = 0, count = 0;
+                for (let i = 0; i < boids.length; i++) {
+                    const b = boids[i];
+                    if ((b.x - pred.x) ** 2 + (b.y - pred.y) ** 2 < 240 * 240) { cx += b.x; cy += b.y; count++; }
+                }
+                if (count > 0) {
+                    const tx = cx / count - pred.x, ty = cy / count - pred.y, d = Math.hypot(tx, ty) || 1;
+                    pred.vx += (tx / d) * 0.14; pred.vy += (ty / d) * 0.14;
+                }
+                for (let w = 0; w < walls.length; w++) {
+                    const wall = walls[w], ddx = pred.x - wall.x, ddy = pred.y - wall.y, d2 = ddx * ddx + ddy * ddy, ar = wall.r + 34;
+                    if (d2 < ar * ar && d2 > 0.01) { const d = Math.sqrt(d2); pred.vx += (ddx / d) * 0.7; pred.vy += (ddy / d) * 0.7; }
+                }
+                const m = 55;
+                if (pred.x < m) pred.vx += 0.25; else if (pred.x > W - m) pred.vx -= 0.25;
+                if (pred.y < m) pred.vy += 0.25; else if (pred.y > H - m) pred.vy -= 0.25;
+                const ps = Math.hypot(pred.vx, pred.vy) || 1, pm = cfg.maxSpeed * 0.88;
+                pred.vx = (pred.vx / ps) * Math.min(ps, pm); pred.vy = (pred.vy / ps) * Math.min(ps, pm);
+                pred.x = Math.max(10, Math.min(W - 10, pred.x + pred.vx));
+                pred.y = Math.max(10, Math.min(H - 10, pred.y + pred.vy));
+            }
+
+            for (let i = sparks.length - 1; i >= 0; i--) {
+                const s = sparks[i];
+                s.x += s.vx; s.y += s.vy; s.vx *= 0.93; s.vy *= 0.93; s.life -= 0.04;
+                if (s.life <= 0) sparks.splice(i, 1);
+            }
+        }
+
+        function drawFrame() {
+            // Archival paper wash fade
+            const alpha = 1 - (cfg.trail / 100) * 0.91;
+            ctx.fillStyle = `rgba(246, 241, 231, ${alpha.toFixed(3)})`;
+            ctx.fillRect(0, 0, W, H);
+
+            // Stones (walls)
+            for (let i = 0; i < walls.length; i++) {
+                const w = walls[i];
+                ctx.fillStyle = '#d9d0be';
+                ctx.strokeStyle = '#575044';
+                ctx.lineWidth = 1.4;
+                ctx.beginPath();
+                ctx.arc(w.x, w.y, w.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // Seeds (food)
+            for (let i = 0; i < foods.length; i++) {
+                const f = foods[i];
+                const r = 3.5 + f.energy * 0.9;
+                ctx.fillStyle = '#2e5d47';
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(46, 93, 71, 0.32)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, r + 5, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Ink Boids (swallow/sparrow silhouette)
+            const pal = PALETTES[cfg.palette];
+            for (let i = 0; i < boids.length; i++) {
+                const b = boids[i];
+                const angle = Math.atan2(b.vy, b.vx);
+                const l = pal.lMin + (pal.lMax - pal.lMin) * b.seed;
+                ctx.save();
+                ctx.translate(b.x, b.y);
+                ctx.rotate(angle);
+                ctx.fillStyle = `hsl(${pal.h}, ${pal.s}%, ${l}%)`;
+                ctx.beginPath();
+                ctx.moveTo(8, 0);
+                ctx.lineTo(-5, -3.5);
+                ctx.lineTo(-2.5, 0);
+                ctx.lineTo(-5, 3.5);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Hawks (vermilion ink kites)
+            for (let i = 0; i < predators.length; i++) {
+                const p = predators[i];
+                const angle = Math.atan2(p.vy, p.vx);
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(angle);
+                ctx.fillStyle = '#c43728';
+                ctx.beginPath();
+                ctx.moveTo(15, 0);
+                ctx.lineTo(-9, -7.5);
+                ctx.lineTo(-4.5, 0);
+                ctx.lineTo(-9, 7.5);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Ink splatter sparks
+            for (let i = 0; i < sparks.length; i++) {
+                const s = sparks[i];
+                ctx.globalAlpha = Math.max(0, s.life);
+                ctx.fillStyle = s.color;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, 1.8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        let isDown = false, lastPlace = 0;
+        function applyTool(x, y, isDrag) {
+            const now = performance.now();
+            if (cfg.tool === 'food') {
+                if (isDrag && now - lastPlace < 90) return;
+                if (foods.length < 40) foods.push({ x, y, energy: 6 });
+                spawnSparks(x, y, '#2e5d47', 4);
+                lastPlace = now;
+            } else if (cfg.tool === 'predator') {
+                if (isDrag) return;
+                if (predators.length < 10) predators.push(createPredator(x, y));
+                spawnSparks(x, y, '#c43728', 8);
+            } else if (cfg.tool === 'wall') {
+                if (walls.length < 220) {
+                    const last = walls[walls.length - 1];
+                    if (!last || Math.hypot(last.x - x, last.y - y) > 16) walls.push({ x, y, r: 12 });
+                }
+            } else if (cfg.tool === 'boid') {
+                if (isDrag && now - lastPlace < 45) return;
+                if (boids.length < 500) {
+                    boids.push(createBoid(x, y));
+                    cfg.targetCount = boids.length;
+                    document.getElementById('val-cnt').textContent = boids.length;
+                }
+                lastPlace = now;
+            } else if (cfg.tool === 'erase') {
+                const er = 36;
+                walls = walls.filter(w => Math.hypot(w.x - x, w.y - y) > er);
+                foods = foods.filter(f => Math.hypot(f.x - x, f.y - y) > er);
+                predators = predators.filter(p => Math.hypot(p.x - x, p.y - y) > er);
+            }
+        }
+        function getPos(e) { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+        canvas.addEventListener('pointerdown', e => { isDown = true; canvas.setPointerCapture(e.pointerId); const p = getPos(e); applyTool(p.x, p.y, false); });
+        canvas.addEventListener('pointermove', e => { if (!isDown) return; const p = getPos(e); applyTool(p.x, p.y, true); });
+        window.addEventListener('pointerup', () => { isDown = false; });
+
+        document.querySelectorAll('.tool-btn').forEach(btn => btn.addEventListener('click', () => {
+            cfg.tool = btn.dataset.tool;
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.toggle('active', b === btn));
+            document.getElementById('stage-hint').innerHTML = TOOL_HINTS[cfg.tool];
+        }));
+        document.querySelectorAll('.chip-btn').forEach(btn => btn.addEventListener('click', () => applyPreset(btn.dataset.preset)));
+        document.querySelectorAll('.ink-btn').forEach(btn => btn.addEventListener('click', () => {
+            cfg.palette = btn.dataset.palette;
+            document.querySelectorAll('.ink-btn').forEach(b => b.classList.toggle('active', b === btn));
+        }));
+
+        const bindSlider = (id, vId, key, f, cb) => document.getElementById(id).addEventListener('input', e => {
+            cfg[key] = Number(e.target.value);
+            document.getElementById(vId).textContent = f(cfg[key]);
+            if (cb) cb();
+        });
+        bindSlider('sl-sep', 'val-sep', 'sep', v => v.toFixed(2));
+        bindSlider('sl-ali', 'val-ali', 'ali', v => v.toFixed(2));
+        bindSlider('sl-coh', 'val-coh', 'coh', v => v.toFixed(2));
+        bindSlider('sl-rad', 'val-rad', 'radius', v => `${v} px`);
+        bindSlider('sl-spd', 'val-spd', 'maxSpeed', v => v.toFixed(1));
+        bindSlider('sl-cnt', 'val-cnt', 'targetCount', v => String(v), syncBoidCount);
+        bindSlider('sl-trl', 'val-trl', 'trail', v => `${v}%`);
+
+        document.getElementById('btn-pause').addEventListener('click', () => {
+            cfg.paused = !cfg.paused;
+            document.getElementById('btn-pause').textContent = cfg.paused ? 'Resume' : 'Pause';
+        });
+        document.getElementById('btn-clear-objs').addEventListener('click', () => { foods = []; walls = []; predators = []; });
+        document.getElementById('btn-reset').addEventListener('click', () => { foods = []; walls = []; foodEaten = 0; boids = []; applyPreset('murmuration'); });
+
+        let frames = 0, lastFps = performance.now();
+        function loop(now) {
+            requestAnimationFrame(loop);
+            if (!cfg.paused) updateSimulation();
+            drawFrame();
+            frames++;
+            if (now - lastFps >= 500) {
+                document.getElementById('hud-fps').textContent = Math.round((frames * 1000) / (now - lastFps));
+                document.getElementById('hud-boids').textContent = boids.length;
+                document.getElementById('hud-preds').textContent = predators.length;
+                document.getElementById('hud-eaten').textContent = foodEaten;
+                frames = 0; lastFps = now;
+            }
+        }
+
+        resize();
+        applyPreset('murmuration');
+        foods.push({ x: W * 0.32, y: H * 0.48, energy: 7 }, { x: W * 0.68, y: H * 0.52, energy: 7 });
+        requestAnimationFrame(loop);
+    })();
+    </script>
+</body>
+</html>
