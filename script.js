@@ -16,7 +16,8 @@ const DEFAULT_PROJECTS = [
   { "title": "Urdu",        "link": "https://meteorinca.github.io/urdu/",              "icon": "urdu" },
   { "title": "Fish",        "link": "https://meteorinca.github.io/fishgame/",          "icon": "fish" },
   { "title": "Math Race",   "link": "https://meteorinca.github.io/MathRacingTutorFS/", "icon": "race" },
-  { "title": "Stack",       "link": "https://meteorinca.github.io/p5stack-demo/",      "icon": "stack" }
+  { "title": "Stack",       "link": "https://meteorinca.github.io/p5stack-demo/",      "icon": "stack" },
+  { "title": "Bouy",        "link": "https://meteorinca.github.io/bouy/",              "icon": "bouy" }
 ];
 
 const ICONS = {
@@ -37,7 +38,8 @@ const ICONS = {
   urdu: `<svg viewBox="0 0 24 24"><path d="M18 6c-2 6-5 11-11 12"/><path d="M13 6c-1 3-3 5-6 6"/><circle cx="14" cy="16" r="1.2"/></svg>`,
   fish: `<svg viewBox="0 0 24 24"><path d="M4 12c3-4 8-5 13-1-5 4-10 3-13-1z"/><polygon points="17,11 21,8 21,14"/><circle cx="8.5" cy="11" r="0.8"/></svg>`,
   race: `<svg viewBox="0 0 24 24"><path d="M5 18V5h11l-2 4 2 4H5"/></svg>`,
-  stack: `<svg viewBox="0 0 24 24"><rect x="6" y="15" width="12" height="4" rx="1"/><rect x="7" y="10" width="10" height="4" rx="1"/><rect x="8.5" y="5" width="7" height="4" rx="1"/></svg>`
+  stack: `<svg viewBox="0 0 24 24"><rect x="6" y="15" width="12" height="4" rx="1"/><rect x="7" y="10" width="10" height="4" rx="1"/><rect x="8.5" y="5" width="7" height="4" rx="1"/></svg>`,
+  bouy: `<svg viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="1.5"/><path d="M9 16l1.5-8.5h3L15 16"/><path d="M3 18c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0"/></svg>`
 };
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -88,5 +88,10 @@
     "title": "Stack",
     "link": "https://meteorinca.github.io/p5stack-demo/",
     "icon": "stack"
+  },
+  {
+    "title": "Bouy",
+    "link": "https://meteorinca.github.io/bouy/",
+    "icon": "bouy"
   }
 ]
